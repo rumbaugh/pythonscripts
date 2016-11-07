@@ -1,0 +1,26 @@
+import math as m
+def deg2hms(ang):
+    hour = m.floor(ang*24/(360.0))
+    rem = ang*24/(360.0) - hour
+    minute = m.floor(rem*60.0)
+    sec = 60*(rem*60.0-minute)
+    return int(hour),int(minute),sec
+
+def deg2dms(ang):
+    deg = m.floor(ang)
+    rem = ang - deg
+    minute = m.floor(rem*60.0)
+    sec = 60*(rem*60.0-minute)
+    return int(deg),int(minute),sec
+
+def dec2hms(ang):
+    return deg2hms(ang)
+
+def dec2dms(ang):
+    return deg2dms(ang)
+
+def hms2deg(hour,minute,sec):
+    return (360.0/24)*(hour+60*(minute+60*sec))
+
+def dms2deg(deg,minute,sec):
+    return deg+60*(minute+60*sec)
