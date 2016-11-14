@@ -36,11 +36,11 @@ def find_tile(rap,decp):
     gct=np.where((np.abs(decp-TDF['DEC_CENT'])<2.)&(np.abs(rap-TDF['RA_CENT'])*np.cos(decp*np.pi/180)<2.))[0]
     gcta=np.where((np.abs(decp-altpolydeccens)<2.)&(np.abs(rap-altpolyracens)*np.cos(decp*np.pi/180)<2.))[0]
     for i in range(0,len(gct)):
-        if Tpolys[gct[i]].contains(curp): tilenamematches='%s,%s'%(tilenamematches,TDF['TILENAME'][gct[i]])
+        if Tpolys[gct[i]].contains(curp): tilenamematches='%s;%s'%(tilenamematches,TDF['TILENAME'][gct[i]])
     for i in range(0,len(gcta)):
-        if altpolys[gcta[i]].contains(curp): tilenamematches='%s,%s'%(tilenamematches,altpolynames[i])
+        if altpolys[gcta[i]].contains(curp): tilenamematches='%s;%s'%(tilenamematches,altpolynames[i])
     if tilenamematches!='': 
-        if tilenamematches[0]==',': tilenamematches=tilenamematches[1:]
+        if tilenamematches[0]==';': tilenamematches=tilenamematches[1:]
         tilenameout=tilenamematches
     return tilenameout
             
