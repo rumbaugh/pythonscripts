@@ -71,7 +71,7 @@ def plot_band(ax,mjd,mag,magerr,cbands,band,connectpoints=True,nolabels=False):
     #return
 
 
-def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,fname=None,DESfname=None,connectpoints=True,specfile=None):
+def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,fname=None,DESfname=None,connectpoints=True,specfile=None,WavLL=3000,WavUL=10500):
     bcens={'u': 3876.63943790537, 'g': 4841.83358196563, 'r': 6438/534828217, 'i': 7820.99282740933, 'z': 9172.34266385718, 'Y': 9877.80238651117}
     VBfile='%s/VanderBerk_datafile1.txt'%DBdir
     crv=np.loadtxt(VBfile,skiprows=23)
@@ -289,7 +289,7 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
                 dum2,newz=DES2SDSS_iz(medi,cr['MAG'][gdes][gz])
                 cr['MAG'][gdes[gi]],cr['MAG'][gdes[gz]]=newi,newz
         mjd,mag,magerr,bands,survey=cr['MJD'],cr['MAG'],cr['MAGERR'],cr['BAND'],cr['Survey']
-        plot_lightcurve(DBID,mjd,mag,magerr,bands,survey,trueredshift,DBdir,specfile=specfile,DESfname=DESfname)
+        plot_lightcurve(DBID,mjd,mag,magerr,bands,survey,trueredshift,DBdir,specfile=specfile,DESfname=DESfname,WavLL=WavLL,WavUL=WavUL)
     psfpdf.close()
 
 def plot_CLQ_candidates(magdrop,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A1',WavLL=3000,WavUL=10500,convertDESmags=False):
