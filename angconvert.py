@@ -23,4 +23,4 @@ def hms2deg(hour,minute,sec):
     return (360.0/24)*(hour+(minute+sec/60.0)/60.0)
 
 def dms2deg(deg,minute,sec):
-    return deg+(minute+sec/60.0)/60.0
+    return deg+sign(deg)*(minute+sec/60.0)/60.0
