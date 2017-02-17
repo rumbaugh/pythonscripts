@@ -201,7 +201,7 @@ def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,fname=No
         ax1.set_title(dbid)
     if not(DESfname in [None,'False']):
         ax4=plt.subplot2grid((2,10),(1,6),colspan=4,xticks=[],yticks=[])
-        img4=mpimg.imread('%s/imagestamps/%s'%(DBdir/DESfname))
+        img4=mpimg.imread('%s/imagestamps/%s'%(DBdir,DESfname))
         ax4.imshow(img4)
     if len(gsdss)>0:
         SDSSfname='%s/imagestamps/%s_SDSScutout.jpeg'%(DBdir,dbid)
