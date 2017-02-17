@@ -97,19 +97,24 @@ def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage=
             if len(POSSmagdict['i'])>0: mag[gposs][bands[gposs]=='i']=0
     bestdiff={b: {'diff': 0, 'ihi': 0, 'ilo': 0} for b in ['g','r','i','z']}
     for b in ['g','r','i','z']:
-        gb=np.where(bands==b)[0]
+        #gb=np.where(bands==b)[0]
         if len(gb)>1:
-            combis=np.array(list(it.combinations(np.arange(len(mag[gb])),2)))
-            i1,i2=combis[:,0],combis[:,1]
-            sigma=np.abs((mag[gb][i1]-mag[gb][i2])/np.sqrt(magerr[gb][i1]**2+magerr[gb][i2]**2))
-            totdiffstmp=np.abs(mag[gb][i1]-mag[gb][i2])
-            ggooddiff=np.where((sigma>=3)&(mag[gb][i1]>1)&(mag[gb][i1]<30)&(mag[gb][i2]>1)&(mag[gb][i2]<30))[0]
-            if len(ggooddiff)>0:
-                bestdiff[b]['diff']=np.max(totdiffstmp[ggooddiff])
-                gsort=np.argsort(totdiffstmp[ggooddiff])
-                gsortis=np.argsort([mag[gb][i1][ggooddiff][gsort[-1]],mag[gb][i2][ggooddiff][gsort[-1]]])
-                imax,imin=[i1,i2][gsortis[0]][ggooddiff][gsort[-1]],[i1,i2][gsortis[1]][ggooddiff][gsort[-1]]
-                bestdiff[b]['ihi'],bestdiff[b]['ilo']=imax,imin
+            gsdssb,gdesb=np.where(bands[gsdss]==b)[0],np.where(bands[gdes]==b)[0]
+            if ((len(gsdssb)>0)&(len(gdesb)>0)):
+                magpairs=np.zeros([len(gsdssb)*len(gdesb),2])
+                magpairs[:,1],magpairs[:,0]=np.repeat(mag[gsdss[gsdssb]],len(gdesb)),np.tile(mag[gdes[gdesb]],len(gsdssb))
+                magerrpairs=np.zeros([len(gsdssb)*len(gdesb),2])
+                magerrpairs[:,1],magerrpairs[:,0]=np.repeat(magerr[gsdss[gsdssb]],len(gdesb)),np.tile(magerr[gdes[gdesb]],len(gsdssb))
+                magdiffs,differrs=magpairs[:,0]-magpairs[:,1],np.sqrt(np.sum(magerrpairs**2,axis=1))
+                ipairs=np.zeros([len(gsdssb)*len(gdesb),2])
+                ipairs[:,1],ipairs[:,0]=np.repeat(gsdss[gsdssb],len(gdesb)),np.tile(gdes[gdesb],len(gsdssb))
+                diffsigs=magdiffs/differrs
+                gsig=np.where(diffsigs>3)[0]
+                if len(gsig)>0:
+                    gmax=np.argsort(diffsigs[gsig])[-1]
+                    imax,imin=ipairs[:,1][gsig[gmax]],ipairs[:,0][gsig[gmax]]
+                    bestdiff[b]['diff']=np.max(diffsigs[gsig])
+                    bestdiff[b]['ihi'],bestdiff[b]['ilo']=imax,imin
     fig=plt.figure(1)
     fig.clf()
     ax3=plt.subplot2grid((2,10),(1,0),colspan=6)
@@ -124,8 +129,8 @@ def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage=
     maxfluxerrs,minfluxerrs=np.zeros(4),np.zeros(4)
     for ib,b in zip(np.arange(4),['g','r','i','z']):
         gbt=np.where(bands==b)[0]
-        maxfluxes[ib],maxfluxerrs[ib]=calc_flux(mjd,mag,magerr,bands,b,mjd[gbbest][imax])
-        minfluxes[ib],minfluxerrs[ib]=calc_flux(mjd,mag,magerr,bands,b,mjd[gbbest][imin])
+        maxfluxes[ib],maxfluxerrs[ib]=calc_flux(mjd,mag,magerr,bands,b,mjd[imax])
+        minfluxes[ib],minfluxerrs[ib]=calc_flux(mjd,mag,magerr,bands,b,mjd[imin])
     plt.rc('axes',linewidth=2)
     plt.fontsize = 14
     plt.tick_params(which='major',length=8,width=2,labelsize=14)
@@ -157,16 +162,6 @@ def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage=
     if np.max(minfluxes)>maxplot:maxplot=np.max(minfluxes)
     ax3.set_xlabel('Wavelength (A)')
     ax3.set_ylabel('Flux (Arb. Units)')
-    survmax,survmin=survey[gbbest][imax],survey[gbbest][imin]
-    if ((not('DES' in [survmax,survmin]))&('DES' in survey[bands==bbest])):
-        sortmjdcens=np.argsort([mjd[gbbest][imax],mjd[gbbest][imin]])
-        iDESex=np.argsort(mag[(bands==bbest)&(survey=='DES')])[-sortmjdcens[0]]
-        DESexfluxes,DESexfluxerrs=np.zeros(4),np.zeros(4)
-        for ib,b in zip(np.arange(4),['g','r','i','z']):
-            gbt=np.where(bands==b)[0]
-            DESexfluxes[ib],DESexfluxerrs[ib]=calc_flux(mjd,mag,magerr,bands,b,mjd[(bands==bbest)&(survey=='DES')][iDESex])
-        plot_flux(ax3,DESexfluxes,DESexfluxerrs,label='DES %s'%['Max','Min'][-sortmjdcens[0]],curcol='cyan')
-        if np.max(DESexfluxes)>maxplot:maxplot=np.max(DESexfluxes)
     #ax3.legend(loc='lower right')
     plt.xlim(WavLL,WavUL)
     plt.ylim(-0.05,vmax*1.05)
