@@ -6,6 +6,7 @@ import itertools as it
 import pyfits as py
 
 def plot_flux(ax,fluxes,fluxerrs=None,label=None,curcol='k',bands=np.array(['g','r','i','z'])):
+    bcens={'u': 3876.63943790537, 'g': 4841.83358196563, 'r': 6438/534828217, 'i': 7820.99282740933, 'z': 9172.34266385718, 'Y': 9877.80238651117}
     if len(fluxes)!=len(bands):
         print 'Lengths of fluxes and bands must be equal'
         return
@@ -222,8 +223,6 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
     hdu=py.open('%s/masterfile.fits'%DBdir)
     data=hdu[1].data
     psfpdf=bpdf.PdfPages(outputfile)
-    bands=np.array(['g','r','i','z'])
-    bcens={'u': 3876.63943790537, 'g': 4841.83358196563, 'r': 6438/534828217, 'i': 7820.99282740933, 'z': 9172.34266385718, 'Y': 9877.80238651117}
 
     crdescutout=np.loadtxt('%s/imagestamps/DESimagestamp_index.dat'%DBdir,dtype={'names':('DBID','ra','dec','tile','fname'),'formats':('|S32','f8','f8','|S12','|S25')})
 
