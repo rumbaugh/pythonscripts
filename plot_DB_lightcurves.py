@@ -356,7 +356,8 @@ def plot_DBID(DBID,DBdir='/data2/rumbaugh/var_database/Y3A1',WavLL=3000,WavUL=10
     plot_lightcurve(DBID,mjd,mag,magerr,bands,survey,trueredshift,DBdir,specfile=specfile,DESfname=DESfname,WavLL=WavLL,WavUL=WavUL)
     plt.show()
 
-def plot_CLQ_candidates(magdrop,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A1',WavLL=3000,WavUL=10500,convertDESmags=False):
+def plot_CLQ_candidates(magdrop,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A1',WavLL=3000,WavUL=10500,convertDESmags=False,outputDBIDs=None):
     crdrop=np.loadtxt('%s/max_mag_drop.dat'%DBdir,dtype={'names':('DBID','maxdiff'),'formats':('|S128','f8')},skiprows=1)
     good_dbids=crdrop['DBID'][crdrop['maxdiff']>=magdrop]
     plot_DB_lightcurves(good_dbids,outputfile,DBdir=DBdir,WavLL=WavLL,WavUL=WavUL,convertDESmags=convertDESmags)
+    if outputDBIDs!=None:np.savetxt(outputDBIDs,good_dbids,fmt='%s')
