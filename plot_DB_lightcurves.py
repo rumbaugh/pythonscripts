@@ -234,7 +234,7 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
     SDSS_colnames={b:'%s_SDSS'%b for b in SDSSbands}
     POSSbands=np.array(['g','r','i'])
 
-    for DBID in DBID:
+    for DBID in DBIDs:
         gdc=np.where(crdescutout['DBID']==DBID)[0]
         if len(gdc)>0:
             if crdescutout['fname'][gdc[0]]!='False':
