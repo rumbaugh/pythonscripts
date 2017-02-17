@@ -71,7 +71,7 @@ def plot_band(ax,mjd,mag,magerr,cbands,band,connectpoints=True,nolabels=False):
     #return
 
 
-def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage,fname=None,DESfname=None,connectpoints=True,specfile=None,WavLL=3000,WavUL=10500):
+def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage=None,fname=None,DESfname=None,connectpoints=True,specfile=None,WavLL=3000,WavUL=10500):
     bcens={'u': 3876.63943790537, 'g': 4841.83358196563, 'r': 6438/534828217, 'i': 7820.99282740933, 'z': 9172.34266385718, 'Y': 9877.80238651117}
     VBfile='%s/VanderBerk_datafile1.txt'%DBdir
     crv=np.loadtxt(VBfile,skiprows=23)
@@ -212,7 +212,7 @@ def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage,
             ax3.imshow(img3)
         except:
             pass
-    plt.savefig(psfpage,format='pdf')
+    if psfpage!=None:plt.savefig(psfpage,format='pdf')
     return
 
 def DES2SDSS_gr(g,r):
@@ -292,6 +292,73 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
         mjd,mag,magerr,bands,survey=cr['MJD'],cr['MAG'],cr['MAGERR'],cr['BAND'],cr['Survey']
         plot_lightcurve(DBID,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage,specfile=specfile,DESfname=DESfname,WavLL=WavLL,WavUL=WavUL)
     psfpage.close()
+
+def plot_DBID(DBID,DBdir='/data2/rumbaugh/var_database/Y3A1',WavLL=3000,WavUL=10500,convertDESmags=False):
+    hdu=py.open('%s/masterfile.fits'%DBdir)
+    data=hdu[1].data
+    crdescutout=np.loadtxt('%s/imagestamps/DESimagestamp_index.dat'%DBdir,dtype={'names':('DBID','ra','dec','tile','fname'),'formats':('|S32','f8','f8','|S12','|S25')})
+    crdb=np.loadtxt('%s/database_index.dat'%DBdir,dtype={'names':('DBID','CID','thingid','sdr7id','MQrownum','SP_rownum','SDSSNAME'),'formats':('|S64','i8','i8','|S24','i8','i8','|S64')})
+    crpmf1=np.loadtxt('%s/MQ_SDSS_y3a1_tidplatemjdfiber.csv'%DBdir,delimiter=',',skiprows=1,dtype={'names':('tid','plate','mjd','fiber'),'formats':('i8','i8','i8','i8')})
+    crpmf2=np.loadtxt('%s/DR7_BH_SDSS_tidplatemjdfiber.csv'%DBdir,delimiter=',',skiprows=1,dtype={'names':('tid','plate','mjd','fiber'),'formats':('i8','i8','i8','i8')})
+    crpmf=np.concatenate((crpmf1,crpmf2),axis=0)
+
+    coldict={'g': 'green','r': 'red', 'i': 'magenta', 'z': 'blue', 'Y': 'cyan'}
+    SDSSbands=np.array(['u','g','r','i','z'])
+    SDSS_colnames={b:'%s_SDSS'%b for b in SDSSbands}
+    POSSbands=np.array(['g','r','i'])
+    gdc=np.where(crdescutout['DBID']==DBID)[0]
+    if len(gdc)>0:
+        if crdescutout['fname'][gdc[0]]!='False':
+            DESfname='%s.tif'%(crdescutout['fname'][gdc[0]])
+    gmf=np.where(data['DatabaseID']==DBID)[0][0]
+    trueredshift=data['Redshift'][gmf]
+    redshift=np.copy(trueredshift)
+    if redshift<0: redshift=0
+    gdb=np.where(crdb['DBID']==DBID)[0][0]
+    tid=crdb['thingid'][gdb]
+    plate,pmf_mjd,fiber=-1,-1,-1
+    if tid!=0:
+        gpmf=np.where(crpmf['tid']==tid)[0]
+        if len(gpmf)>0:
+            gpmf=gpmf[0]
+            plate,pmf_mjd,fiber=crpmf['plate'][gpmf],crpmf['mjd'][gpmf],crpmf['fiber'][gpmf]
+    if (plate>-1)&(pmf_mjd>-1)&(fiber>-1):
+        specfile='%s/spec/spec-%04i-%05i-%04i.fits'%(DBdir,plate,pmf_mjd,fiber)
+    else:
+        specfile=None
+    cr=np.loadtxt('%s/%s/LC.tab'%(DBdir,DBID),dtype={'names':('DatabaseID','Survey','SurveyCoaddID','SurveyObjectID','RA','DEC','MJD','TAG','BAND','MAGTYPE','MAG','MAGERR','FLAG'),'formats':('|S64','|S20','|S20','|S20','f8','f8','f8','|S20','|S12','|S12','f8','f8','i8')},skiprows=1)
+    cr=cr[(cr['MAG']>0)&(cr['MAG']<30)&(cr['MAGERR']<5)]
+    gdes=np.where(cr['Survey']=='DES')[0]
+    if ((len(gdes)>1)&(convertDESmags)):
+        gg,gr=np.where(cr['BAND'][gdes]=='g')[0],np.where(cr['BAND'][gdes]=='r')[0]
+        if (len(gg)>0)&(len(gr)>0):
+            if len(gg)==1:
+                medg=cr['MAG'][gdes][gg]
+            else:
+                medg=np.median(cr['MAG'][gdes][gg])
+            if len(gr)==1:
+                medr=cr['MAG'][gdes][gr]
+            else:
+                medr=np.median(cr['MAG'][gdes][gr])
+            newg,dum1=DES2SDSS_gr(cr['MAG'][gdes][gg],medr)
+            dum2,newr=DES2SDSS_gr(medg,cr['MAG'][gdes][gr])
+            cr['MAG'][gdes[gg]],cr['MAG'][gdes[gr]]=newg,newr
+        gi,gz=np.where(cr['BAND'][gdes]=='i')[0],np.where(cr['BAND'][gdes]=='z')[0]
+        if (len(gi)>0)&(len(gz)>0):
+            if len(gi)==1:
+                medi=cr['MAG'][gdes][gi]
+            else:
+                medi=np.median(cr['MAG'][gdes][gi])
+            if len(gz)==1:
+                medz=cr['MAG'][gdes][gz]
+            else:
+                medz=np.median(cr['MAG'][gdes][gz])
+            newi,dum1=DES2SDSS_iz(cr['MAG'][gdes][gi],medz)
+            dum2,newz=DES2SDSS_iz(medi,cr['MAG'][gdes][gz])
+            cr['MAG'][gdes[gi]],cr['MAG'][gdes[gz]]=newi,newz
+    mjd,mag,magerr,bands,survey=cr['MJD'],cr['MAG'],cr['MAGERR'],cr['BAND'],cr['Survey']
+    plot_lightcurve(DBID,mjd,mag,magerr,bands,survey,trueredshift,DBdir,specfile=specfile,DESfname=DESfname,WavLL=WavLL,WavUL=WavUL)
+    plt.show()
 
 def plot_CLQ_candidates(magdrop,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A1',WavLL=3000,WavUL=10500,convertDESmags=False):
     crdrop=np.loadtxt('%s/max_mag_drop.dat'%DBdir,dtype={'names':('DBID','maxdiff'),'formats':('|S128','f8')},skiprows=1)
