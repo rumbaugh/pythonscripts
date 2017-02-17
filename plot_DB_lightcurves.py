@@ -72,6 +72,7 @@ def plot_band(ax,mjd,mag,magerr,cbands,band,connectpoints=True,nolabels=False):
 
 
 def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,fname=None,DESfname=None,connectpoints=True,specfile=None):
+    bcens={'u': 3876.63943790537, 'g': 4841.83358196563, 'r': 6438/534828217, 'i': 7820.99282740933, 'z': 9172.34266385718, 'Y': 9877.80238651117}
     VBfile='%s/VanderBerk_datafile1.txt'%DBdir
     crv=np.loadtxt(VBfile,skiprows=23)
     redshift=np.copy(trueredshift)
