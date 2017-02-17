@@ -129,15 +129,18 @@ def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,fname=No
     plt.tick_params(which='minor',length=4,width=1.5,labelsize=14)
     plt.locator_params(nbins=4)
     if specfile!=None:
-        shdu=py.open(specfile)
-        specdata=shdu[1].data
-        sflux,swav=specdata['flux'],10**(specdata['loglam'])
-        s_closei=np.where(np.abs(swav-bcens['i'])<20)[0]
-        smwid=10
-        swav=swav[smwid:-smwid]
-        normflux=sflux/np.mean(sflux[s_closei])
-        smoothflux=[np.mean(normflux[x-smwid:x+smwid+1]) for x in np.arange(smwid,len(normflux)-smwid)]
-        ax3.plot(swav,smoothflux,lw=1,color='magenta',zorder=1)
+        try:
+            shdu=py.open(specfile)
+            specdata=shdu[1].data
+            sflux,swav=specdata['flux'],10**(specdata['loglam'])
+            s_closei=np.where(np.abs(swav-bcens['i'])<20)[0]
+            smwid=10
+            swav=swav[smwid:-smwid]
+            normflux=sflux/np.mean(sflux[s_closei])
+            smoothflux=[np.mean(normflux[x-smwid:x+smwid+1]) for x in np.arange(smwid,len(normflux)-smwid)]
+            ax3.plot(swav,smoothflux,lw=1,color='magenta',zorder=1)
+        except IOError:
+            specfile=None
     v_closei=np.where(np.abs(crv[:,0]*(1.+redshift)-bcens['i'])<20)[0]
     gvrange=np.where((crv[:,0]*(1.+redshift)>WavLL)&(crv[:,0]*(1.+redshift)<WavUL))[0]
     if len(gvrange)>0:
