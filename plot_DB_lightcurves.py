@@ -196,7 +196,7 @@ def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,fname=No
     ax1.set_xlabel('MJD')
     ax1.set_ylabel('Mag_PSF')
     if redshift>0:
-        ax1.set_title('%i, z=%.4f'%(dbid,trueredshift))
+        ax1.set_title('%s, z=%.4f'%(dbid,trueredshift))
     else:
         ax1.set_title(dbid)
     if not(DESfname in [None,'False']):
