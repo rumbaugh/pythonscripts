@@ -244,7 +244,7 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
         redshift=np.copy(trueredshift)
         if redshift<0: redshift=0
         gdb=np.where(crdb['DBID']==DBID)[0][0]
-        tid=crdb['tID'][gdb]
+        tid=crdb['thingid'][gdb]
         plate,pmf_mjd,fiber=-1,-1,-1
         if tid!=0:
             gpmf=np.where(crpmf['tid']==tid)[0]
