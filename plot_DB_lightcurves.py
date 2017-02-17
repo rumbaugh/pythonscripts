@@ -88,12 +88,13 @@ def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage,
             mag[gposs][bands[gposs]=='g'],mag[gposs][bands[gposs]=='r']=mag[gposs][bands[gposs]=='g']+0.392*(POSSmagdict['g']-POSSmagdict['r'])-0.28, mag[gposs][bands[gposs]=='r'] +0.127*(POSSmagdict['g']-POSSmagdict['r'])+0.1
             magerr[gposs][bands[gposs]=='g'],magerr[gposs][bands[gposs]=='r']=np.sqrt(1.392**2*magerr[gposs][bands[gposs]=='g']**2+0.392**2*magerr[gposs][bands[gposs]=='r']**2),  np.sqrt(magerr[gposs][bands[gposs]=='r']**2+0.127**2*(magerr[gposs][bands[gposs]=='g']**2+magerr[gposs][bands[gposs]=='r']**2))
         else: 
-            mag[gposs][bands[gposs]=='g'],mag[gposs][bands[gposs]=='r']=np.zeros(0),np.zeros(0)
+            if len(POSSmagdict['g'])>0: mag[gposs][bands[gposs]=='g']=0
+            if len(POSSmagdict['r'])>0: mag[gposs][bands[gposs]=='r']=0
         if (len(POSSmagdict['i'])>0)&(len(POSSmagdict['r'])>0):   
             mag[gposs][bands[gposs]=='i']=mag[gposs][bands[gposs]=='i']+0.27*(POSSmagdict['r']-POSSmagdict['i'])+0.32
             magerr[gposs][bands[gposs]=='i']=np.sqrt(magerr[gposs][bands[gposs]=='i']**2+0.27**2*(magerr[gposs][bands[gposs]=='r']**2+magerr[gposs][bands[gposs]=='i']**2))
         else:
-            mag[gposs][bands[gposs]=='i']=np.zeros(0)
+            if len(POSSmagdict['i'])>0: mag[gposs][bands[gposs]=='i']=0
     bestdiff={b: {'diff': 0, 'ihi': 0, 'ilo': 0} for b in ['g','r','i','z']}
     for b in ['g','r','i','z']:
         gb=np.where(bands==b)[0]
