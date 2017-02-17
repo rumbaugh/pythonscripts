@@ -240,6 +240,7 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
 
     for DBID in DBIDs:
         gdc=np.where(crdescutout['DBID']==DBID)[0]
+        DESfname=None
         if len(gdc)>0:
             if crdescutout['fname'][gdc[0]]!='False':
                 DESfname='%s.tif'%(crdescutout['fname'][gdc[0]])
@@ -307,6 +308,7 @@ def plot_DBID(DBID,DBdir='/data2/rumbaugh/var_database/Y3A1',WavLL=3000,WavUL=10
     SDSS_colnames={b:'%s_SDSS'%b for b in SDSSbands}
     POSSbands=np.array(['g','r','i'])
     gdc=np.where(crdescutout['DBID']==DBID)[0]
+    DESfname=None
     if len(gdc)>0:
         if crdescutout['fname'][gdc[0]]!='False':
             DESfname='%s.tif'%(crdescutout['fname'][gdc[0]])
