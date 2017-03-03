@@ -219,7 +219,6 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
     hdu=py.open('%s/masterfile.fits'%DBdir)
     data=hdu[1].data
     psfpage=bpdf.PdfPages(outputfile)
-
     crdescutout=np.loadtxt('%s/imagestamps/DESimagestamp_index.dat'%DBdir,dtype={'names':('DBID','ra','dec','tile','fname'),'formats':('|S32','f8','f8','|S12','|S25')})
 
     crdb=np.loadtxt('%s/database_index.dat'%DBdir,dtype={'names':('DBID','CID','thingid','sdr7id','MQrownum','SP_rownum','SDSSNAME'),'formats':('|S64','i8','i8','|S24','i8','i8','|S64')})
@@ -238,11 +237,14 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
         if len(gdc)>0:
             if crdescutout['fname'][gdc[0]]!='False':
                 DESfname='%s.tif'%(crdescutout['fname'][gdc[0]])
-        gmf=np.where(data['DatabaseID']==DBID)[0][0]
+        gdb=np.where(crdb['DBID']==DBID)[0][0]
+        gmf=np.where(data['DatabaseID']==DBID)[0]
+        if ((len(gmf)==0)&(DBID[:2]!='MQ')&(crdb['MQrownum'][gdb]>-1)):
+            gmf=np.where(data['DatabaseID']=='MQ%i'%crdb['MQrownum'][gdb])[0]
+        gmf=gmf[0]
         trueredshift=data['Redshift'][gmf]
         redshift=np.copy(trueredshift)
         if redshift<0: redshift=0
-        gdb=np.where(crdb['DBID']==DBID)[0][0]
         tid=crdb['thingid'][gdb]
         plate,pmf_mjd,fiber=-1,-1,-1
         if tid!=0:
