@@ -78,6 +78,7 @@ def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage=
     redshift=np.copy(trueredshift)
     if redshift<0:redshift=0
     gdes,gsdss,gposs=np.where(survey=='DES')[0],np.where(survey=='SDSS')[0],np.where(survey=='POSS')[0]
+    POSSbands=np.array(['g','r','i'])
     if len(gposs)>0:
         POSSmagdict,POSSmagerrdict,POSSmjddict={b: mag[gposs][bands[gposs]==b] for b in POSSbands},{b: np.zeros(0) for b in POSSbands},{b: np.zeros(0) for b in POSSbands}
         for band in POSSbands:
