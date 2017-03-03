@@ -55,6 +55,7 @@ def plot_band(ax,mjd,mag,magerr,cbands,band,connectpoints=True,nolabels=False):
     magplot=mag[gband]
     magploterr=magerr[gband]
     g100=np.where(magplot<100)[0]
+    coldict={'g': 'green','r': 'red', 'i': 'magenta', 'z': 'blue', 'Y': 'cyan'}
     try:
         curcol=coldict[band]
     except KeyError:
