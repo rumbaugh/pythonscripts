@@ -223,7 +223,7 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
     psfpage=bpdf.PdfPages(outputfile)
     crdescutout=np.loadtxt('%s/imagestamps/DESimagestamp_index.dat'%DBdir,dtype={'names':('DBID','ra','dec','tile','fname'),'formats':('|S32','f8','f8','|S12','|S25')})
 
-    crdb=np.loadtxt('%s/database_index.dat'%DBdir,dtype={'names':('DBID','CID','thingid','sdr7id','MQrownum','SP_rownum','SDSSNAME'),'formats':('|S64','i8','i8','|S24','i8','i8','|S64')})
+    crdb=np.loadtxt('%s/database_index.dat'%DBdir,dtype={'names':('DBID','CID','thingid','sdr7id','MQrownum','SPrownum','SDSSNAME'),'formats':('|S64','i8','i8','|S24','i8','i8','|S64')})
     crpmf1=np.loadtxt('%s/MQ_SDSS_y3a1_tidplatemjdfiber.csv'%DBdir,delimiter=',',skiprows=1,dtype={'names':('tid','plate','mjd','fiber'),'formats':('i8','i8','i8','i8')})
     crpmf2=np.loadtxt('%s/DR7_BH_SDSS_tidplatemjdfiber.csv'%DBdir,delimiter=',',skiprows=1,dtype={'names':('tid','plate','mjd','fiber'),'formats':('i8','i8','i8','i8')})
     crpmf=np.concatenate((crpmf1,crpmf2),axis=0)
@@ -300,7 +300,7 @@ def plot_DBID(DBID,DBdir='/data2/rumbaugh/var_database/Y3A1',WavLL=3000,WavUL=10
     hdu=py.open('%s/masterfile.fits'%DBdir)
     data=hdu[1].data
     crdescutout=np.loadtxt('%s/imagestamps/DESimagestamp_index.dat'%DBdir,dtype={'names':('DBID','ra','dec','tile','fname'),'formats':('|S32','f8','f8','|S12','|S25')})
-    crdb=np.loadtxt('%s/database_index.dat'%DBdir,dtype={'names':('DBID','CID','thingid','sdr7id','MQrownum','SP_rownum','SDSSNAME'),'formats':('|S64','i8','i8','|S24','i8','i8','|S64')})
+    crdb=np.loadtxt('%s/database_index.dat'%DBdir,dtype={'names':('DBID','CID','thingid','sdr7id','MQrownum','SPrownum','SDSSNAME'),'formats':('|S64','i8','i8','|S24','i8','i8','|S64')})
     crpmf1=np.loadtxt('%s/MQ_SDSS_y3a1_tidplatemjdfiber.csv'%DBdir,delimiter=',',skiprows=1,dtype={'names':('tid','plate','mjd','fiber'),'formats':('i8','i8','i8','i8')})
     crpmf2=np.loadtxt('%s/DR7_BH_SDSS_tidplatemjdfiber.csv'%DBdir,delimiter=',',skiprows=1,dtype={'names':('tid','plate','mjd','fiber'),'formats':('i8','i8','i8','i8')})
     crpmf=np.concatenate((crpmf1,crpmf2),axis=0)
