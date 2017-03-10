@@ -243,6 +243,7 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
         gdb=np.where(crdb['DBID']==DBID)[0][0]
         gmf=np.where(data['DatabaseID']==DBID)[0]
         if ((len(gmf)==0)&(DBID[:2]!='MQ')&(crdb['MQrownum'][gdb]>-1)):
+            print len(gmf),DBID[:2],crdb['MQrownum'][gdb]
             gmf=np.where(data['DatabaseID']=='MQ%i'%crdb['MQrownum'][gdb])[0]
         gmf=gmf[0]
         trueredshift=data['Redshift'][gmf]
