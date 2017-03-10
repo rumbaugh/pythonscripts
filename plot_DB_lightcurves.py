@@ -247,8 +247,11 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
             gmf=np.where(data['DatabaseID']=='MQ%i'%crdb['MQrownum'][gdb])[0]
         if ((len(gmf)==0)&(DBID[:2]=='DR')&(crdb['SPrownum'][gdb]>-1)):
             gmf=np.where(data['DatabaseID']=='SDSSPOSS%i'%crdb['SPrownum'][gdb])[0]
-        gmf=gmf[0]
-        trueredshift=data['Redshift'][gmf]
+        try:
+            gmf=gmf[0]
+            trueredshift=data['Redshift'][gmf]
+        except:
+            trueredshift=0
         redshift=np.copy(trueredshift)
         if redshift<0: redshift=0
         tid=crdb['thingid'][gdb]
@@ -314,8 +317,11 @@ def plot_DBID(DBID,DBdir='/data2/rumbaugh/var_database/Y3A1',WavLL=3000,WavUL=10
     if len(gdc)>0:
         if crdescutout['fname'][gdc[0]]!='False':
             DESfname='%s.tif'%(crdescutout['fname'][gdc[0]])
-    gmf=np.where(data['DatabaseID']==DBID)[0][0]
-    trueredshift=data['Redshift'][gmf]
+    try:
+        gmf=np.where(data['DatabaseID']==DBID)[0][0]
+        trueredshift=data['Redshift'][gmf]
+    except:
+        trueredshift=0
     redshift=np.copy(trueredshift)
     if redshift<0: redshift=0
     gdb=np.where(crdb['DBID']==DBID)[0][0]
