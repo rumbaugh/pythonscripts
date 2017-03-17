@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.text as txt
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import matplotlib.backends.backend_pdf as bpdf
@@ -190,10 +191,11 @@ def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage=
     if ylim[0]<15: ylim=(15,ylim[1])
     plt.ylim(ylim[1],ylim[0])
     ax1.legend()
+    xlim=plt.xlim()
     if outlierflag==1:
-        ax1.text('OUTLIER',0.05,0.05,color='r',xycoords='axes fraction')
+        ax1.text(0.5*(xlim[0]+xlim[1]),15./16*ylim[0]+ylim[1]/16.,'OUTLIER',color='r',horizontalalignment='center')
     elif outlierflag==2:
-        ax1.text('BAD PHOTOMETRY',0.05,0.05,color='r',xycoords='axes fraction')
+        ax1.text(0.5*(xlim[0]+xlim[1]),15./16*ylim[0]+ylim[1]/16.,'BAD PHOTOMETRY',color='r',horizontalalignment='center')
     ax1.set_xlabel('MJD')
     ax1.set_ylabel('Mag_PSF')
     if redshift>0:
