@@ -191,9 +191,9 @@ def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage=
     plt.ylim(ylim[1],ylim[0])
     ax1.legend()
     if outlierflag==1:
-        ax1.text('OUTLIER',0.05,0.05,c='r',xycoords='axes fraction')
+        ax1.text('OUTLIER',0.05,0.05,color='r',xycoords='axes fraction')
     elif outlierflag==2:
-        ax1.text('BAD PHOTOMETRY',0.05,0.05,c='r',xycoords='axes fraction')
+        ax1.text('BAD PHOTOMETRY',0.05,0.05,color='r',xycoords='axes fraction')
     ax1.set_xlabel('MJD')
     ax1.set_ylabel('Mag_PSF')
     if redshift>0:
