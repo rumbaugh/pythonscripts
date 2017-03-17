@@ -245,7 +245,6 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
         gdc=np.where(crdescutout['DBID']==DBID)[0]
         DESfname=None
         if len(gdc)>0:
-            if len(gdc)>1: gdc=gdc[0]
             if crdescutout['fname'][gdc[0]]!='False':
                 DESfname='%s.tif'%(crdescutout['fname'][gdc[0]])
         gdb=np.where(crdb['DBID']==DBID)[0][0]
