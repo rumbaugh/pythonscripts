@@ -73,7 +73,7 @@ def plot_band(ax,mjd,mag,magerr,cbands,band,connectpoints=True,nolabels=False):
     #return
 
 
-def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage=None,fname=None,DESfname=None,connectpoints=True,specfile=None,WavLL=3000,WavUL=10500,outlierflag=0):
+def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage=None,fname=None,DESfname=None,connectpoints=True,specfile=None,WavLL=3000,WavUL=10500,outlierflag=0,zoominband=None):
     bcens={'u': 3876.63943790537, 'g': 4841.83358196563, 'r': 6438/534828217, 'i': 7820.99282740933, 'z': 9172.34266385718, 'Y': 9877.80238651117}
     VBfile='%s/VanderBerk_datafile1.txt'%DBdir
     crv=np.loadtxt(VBfile,skiprows=23)
@@ -121,55 +121,69 @@ def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage=
     fig=plt.figure(1)
     fig.clf()
     ax3=plt.subplot2grid((2,10),(1,0),colspan=6)
-    totdiffs=np.zeros(4)
-    for ib,b in zip(np.arange(4),['g','r','i','z']):
-        totdiffs[ib]=bestdiff[b]['diff']
-    ibest=np.argsort(totdiffs)[-1]
-    bbest=['g','r','i','z'][ibest]
-    gbbest=np.where(bands==bbest)[0]
-    imax,imin=bestdiff[bbest]['ihi'],bestdiff[bbest]['ilo']
-    maxfluxes,minfluxes=np.zeros(4),np.zeros(4)
-    maxfluxerrs,minfluxerrs=np.zeros(4),np.zeros(4)
-    for ib,b in zip(np.arange(4),['g','r','i','z']):
-        gbt=np.where(bands==b)[0]
-        maxfluxes[ib],maxfluxerrs[ib]=calc_flux(mjd,mag,magerr,bands,b,mjd[imax])
-        minfluxes[ib],minfluxerrs[ib]=calc_flux(mjd,mag,magerr,bands,b,mjd[imin])
     plt.rc('axes',linewidth=2)
     plt.fontsize = 14
     plt.tick_params(which='major',length=8,width=2,labelsize=14)
     plt.tick_params(which='minor',length=4,width=1.5,labelsize=14)
     plt.locator_params(nbins=4)
-    if specfile!=None:
-        try:
-            shdu=py.open(specfile)
-            specdata=shdu[1].data
-            sflux,swav=specdata['flux'],10**(specdata['loglam'])
-            s_closei=np.where(np.abs(swav-bcens['i'])<20)[0]
-            smwid=10
-            swav=swav[smwid:-smwid]
-            normflux=sflux/np.mean(sflux[s_closei])
-            smoothflux=[np.mean(normflux[x-smwid:x+smwid+1]) for x in np.arange(smwid,len(normflux)-smwid)]
-            ax3.plot(swav,smoothflux,lw=1,color='magenta',zorder=1)
-        except IOError:
-            specfile=None
-    v_closei=np.where(np.abs(crv[:,0]*(1.+redshift)-bcens['i'])<20)[0]
-    gvrange=np.where((crv[:,0]*(1.+redshift)>WavLL)&(crv[:,0]*(1.+redshift)<WavUL))[0]
-    if len(gvrange)>0:
-        vmax=np.max(crv[:,1][gvrange]/np.mean(crv[:,1][v_closei]))
+    if zoominband==None:
+        totdiffs=np.zeros(4)
+        for ib,b in zip(np.arange(4),['g','r','i','z']):
+            totdiffs[ib]=bestdiff[b]['diff']
+        ibest=np.argsort(totdiffs)[-1]
+        bbest=['g','r','i','z'][ibest]
+        gbbest=np.where(bands==bbest)[0]
+        imax,imin=bestdiff[bbest]['ihi'],bestdiff[bbest]['ilo']
+        maxfluxes,minfluxes=np.zeros(4),np.zeros(4)
+        maxfluxerrs,minfluxerrs=np.zeros(4),np.zeros(4)
+        for ib,b in zip(np.arange(4),['g','r','i','z']):
+            gbt=np.where(bands==b)[0]
+            maxfluxes[ib],maxfluxerrs[ib]=calc_flux(mjd,mag,magerr,bands,b,mjd[imax])
+            minfluxes[ib],minfluxerrs[ib]=calc_flux(mjd,mag,magerr,bands,b,mjd[imin])
+        if specfile!=None:
+            try:
+                shdu=py.open(specfile)
+                specdata=shdu[1].data
+                sflux,swav=specdata['flux'],10**(specdata['loglam'])
+                s_closei=np.where(np.abs(swav-bcens['i'])<20)[0]
+                smwid=10
+                swav=swav[smwid:-smwid]
+                normflux=sflux/np.mean(sflux[s_closei])
+                smoothflux=[np.mean(normflux[x-smwid:x+smwid+1]) for x in np.arange(smwid,len(normflux)-smwid)]
+                ax3.plot(swav,smoothflux,lw=1,color='magenta',zorder=1)
+            except IOError:
+                specfile=None
+        v_closei=np.where(np.abs(crv[:,0]*(1.+redshift)-bcens['i'])<20)[0]
+        gvrange=np.where((crv[:,0]*(1.+redshift)>WavLL)&(crv[:,0]*(1.+redshift)<WavUL))[0]
+        if len(gvrange)>0:
+            vmax=np.max(crv[:,1][gvrange]/np.mean(crv[:,1][v_closei]))
+        else:
+            vmax=np.max(crv[:,1])
+        if trueredshift>0:ax3.plot(crv[:,0]*(1.+redshift),crv[:,1]/np.mean(crv[:,1][v_closei]),color='k',lw=1,zorder=2)
+        plot_flux(ax3,maxfluxes,maxfluxerrs,label='Max',curcol='r')
+        maxplot=np.max(maxfluxes)
+        plot_flux(ax3,minfluxes,minfluxerrs,label='Min',curcol='b')
+        if np.max(minfluxes)>maxplot:maxplot=np.max(minfluxes)
+        ax3.set_xlabel('Wavelength (A)')
+        ax3.set_ylabel('Flux (Arb. Units)')
+        #ax3.legend(loc='lower right')
+        plt.xlim(WavLL,WavUL)
+        plt.ylim(-0.05,vmax*1.05)
+        if trueredshift<=0: 
+            plt.ylim(-0.05,1.15*maxplot)
     else:
-        vmax=np.max(crv[:,1])
-    if trueredshift>0:ax3.plot(crv[:,0]*(1.+redshift),crv[:,1]/np.mean(crv[:,1][v_closei]),color='k',lw=1,zorder=2)
-    plot_flux(ax3,maxfluxes,maxfluxerrs,label='Max',curcol='r')
-    maxplot=np.max(maxfluxes)
-    plot_flux(ax3,minfluxes,minfluxerrs,label='Min',curcol='b')
-    if np.max(minfluxes)>maxplot:maxplot=np.max(minfluxes)
-    ax3.set_xlabel('Wavelength (A)')
-    ax3.set_ylabel('Flux (Arb. Units)')
-    #ax3.legend(loc='lower right')
-    plt.xlim(WavLL,WavUL)
-    plt.ylim(-0.05,vmax*1.05)
-    if trueredshift<=0: 
-        plt.ylim(-0.05,1.15*maxplot)
+        plot_band(ax3,mjd,mag,magerr,bands,zoominband,connectpoints=connectpoints,nolabels=False)
+        plt.axvline(mjd[imax],ls='dashed',lw=1,color='r')
+        plt.axvline(mjd[imin],ls='dashed',lw=1,color='b')
+        if ylim[1]>30:
+            ylim=(ylim[0],np.max(mag)+0.1)
+        if ylim[1]>30: ylim=(ylim[0],30)
+        if ylim[0]<15:
+            ylim=(np.min(mag)-0.1,ylim[1])
+        if ylim[0]<15: ylim=(15,ylim[1])
+        plt.ylim(ylim[1],ylim[0])
+        ax3.set_xlabel('MJD')
+        ax3.set_ylabel('%s_PSF'%zoominband)
     ax1=plt.subplot2grid((2,10),(0,0),colspan=6)
     plt.rc('axes',linewidth=2)
     plt.fontsize = 14
@@ -223,7 +237,7 @@ def DES2SDSS_gr(g,r):
 def DES2SDSS_iz(i,z):
     return (-89*np.sqrt(-96000*i+96000*z+181561)+8000*z+37827)/8000.,(-17*np.sqrt(-96000*i+96000*z+181561)+24000*z+6731)/24000.
 
-def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A1',WavLL=3000,WavUL=10500,convertDESmags=False,outlierflags=None):
+def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A1',WavLL=3000,WavUL=10500,convertDESmags=False,outlierflags=None,zoominband=None):
     if np.shape(outlierflags)==(): outlierflags=np.zeros(len(DBIDS))
     hdu=py.open('%s/masterfile.fits'%DBdir)
     data=hdu[1].data
@@ -303,7 +317,7 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
                 dum2,newz=DES2SDSS_iz(medi,cr['MAG'][gdes][gz])
                 cr['MAG'][gdes[gi]],cr['MAG'][gdes[gz]]=newi,newz
         mjd,mag,magerr,bands,survey=cr['MJD'],cr['MAG'],cr['MAGERR'],cr['BAND'],cr['Survey']
-        plot_lightcurve(DBID,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage,specfile=specfile,DESfname=DESfname,WavLL=WavLL,WavUL=WavUL,outlierflag=outlierflags[idb])
+        plot_lightcurve(DBID,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage,specfile=specfile,DESfname=DESfname,WavLL=WavLL,WavUL=WavUL,outlierflag=outlierflags[idb],zoominband=zoominband)
     psfpage.close()
 
 def plot_DBID(DBID,DBdir='/data2/rumbaugh/var_database/Y3A1',WavLL=3000,WavUL=10500,convertDESmags=False):
