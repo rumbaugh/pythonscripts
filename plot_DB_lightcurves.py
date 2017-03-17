@@ -302,7 +302,7 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
                 dum2,newz=DES2SDSS_iz(medi,cr['MAG'][gdes][gz])
                 cr['MAG'][gdes[gi]],cr['MAG'][gdes[gz]]=newi,newz
         mjd,mag,magerr,bands,survey=cr['MJD'],cr['MAG'],cr['MAGERR'],cr['BAND'],cr['Survey']
-        plot_lightcurve(DBID,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage,specfile=specfile,DESfname=DESfname,WavLL=WavLL,WavUL=WavUL,outlierflag=outlierflag[idb])
+        plot_lightcurve(DBID,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage,specfile=specfile,DESfname=DESfname,WavLL=WavLL,WavUL=WavUL,outlierflag=outlierflags[idb])
     psfpage.close()
 
 def plot_DBID(DBID,DBdir='/data2/rumbaugh/var_database/Y3A1',WavLL=3000,WavUL=10500,convertDESmags=False):
