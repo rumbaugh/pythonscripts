@@ -72,7 +72,7 @@ def plot_band(ax,mjd,mag,magerr,cbands,band,connectpoints=True,nolabels=False):
     #return
 
 
-def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage=None,fname=None,DESfname=None,connectpoints=True,specfile=None,WavLL=3000,WavUL=10500):
+def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage=None,fname=None,DESfname=None,connectpoints=True,specfile=None,WavLL=3000,WavUL=10500,outlierflag=0):
     bcens={'u': 3876.63943790537, 'g': 4841.83358196563, 'r': 6438/534828217, 'i': 7820.99282740933, 'z': 9172.34266385718, 'Y': 9877.80238651117}
     VBfile='%s/VanderBerk_datafile1.txt'%DBdir
     crv=np.loadtxt(VBfile,skiprows=23)
@@ -190,6 +190,10 @@ def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage=
     if ylim[0]<15: ylim=(15,ylim[1])
     plt.ylim(ylim[1],ylim[0])
     ax1.legend()
+    if outlierflag==1:
+        ax1.text('OUTLIER',0.05,0.05,c='r',xycoords='axes fraction')
+    elif outlierflag==2:
+        ax1.text('BAD PHOTOMETRY',0.05,0.05,c='r',xycoords='axes fraction')
     ax1.set_xlabel('MJD')
     ax1.set_ylabel('Mag_PSF')
     if redshift>0:
@@ -217,7 +221,8 @@ def DES2SDSS_gr(g,r):
 def DES2SDSS_iz(i,z):
     return (-89*np.sqrt(-96000*i+96000*z+181561)+8000*z+37827)/8000.,(-17*np.sqrt(-96000*i+96000*z+181561)+24000*z+6731)/24000.
 
-def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A1',WavLL=3000,WavUL=10500,convertDESmags=False):
+def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A1',WavLL=3000,WavUL=10500,convertDESmags=False,outlierflags=None):
+    if np.shape(outlierflags)==(): outlierflags=np.zeros(len(DBIDS))
     hdu=py.open('%s/masterfile.fits'%DBdir)
     data=hdu[1].data
     psfpage=bpdf.PdfPages(outputfile)
@@ -233,11 +238,12 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
     SDSS_colnames={b:'%s_SDSS'%b for b in SDSSbands}
     POSSbands=np.array(['g','r','i'])
 
-    for DBID in DBIDs:
+    for DBID,idb in zip(DBIDs,np.arange(len(DBID))):
         print DBID
         gdc=np.where(crdescutout['DBID']==DBID)[0]
         DESfname=None
         if len(gdc)>0:
+            if len(gdc)>1: gdc=gdc[0]
             if crdescutout['fname'][gdc[0]]!='False':
                 DESfname='%s.tif'%(crdescutout['fname'][gdc[0]])
         gdb=np.where(crdb['DBID']==DBID)[0][0]
@@ -296,7 +302,7 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
                 dum2,newz=DES2SDSS_iz(medi,cr['MAG'][gdes][gz])
                 cr['MAG'][gdes[gi]],cr['MAG'][gdes[gz]]=newi,newz
         mjd,mag,magerr,bands,survey=cr['MJD'],cr['MAG'],cr['MAGERR'],cr['BAND'],cr['Survey']
-        plot_lightcurve(DBID,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage,specfile=specfile,DESfname=DESfname,WavLL=WavLL,WavUL=WavUL)
+        plot_lightcurve(DBID,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage,specfile=specfile,DESfname=DESfname,WavLL=WavLL,WavUL=WavUL,outlierflag=outlierflag[idb])
     psfpage.close()
 
 def plot_DBID(DBID,DBdir='/data2/rumbaugh/var_database/Y3A1',WavLL=3000,WavUL=10500,convertDESmags=False):
