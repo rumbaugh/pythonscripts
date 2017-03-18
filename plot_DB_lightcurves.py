@@ -99,25 +99,27 @@ def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage=
         else:
             if len(POSSmagdict['i'])>0: mag[gposs][bands[gposs]=='i']=0
     bestdiff={b: {'diff': 0, 'ihi': 0, 'ilo': 0} for b in ['g','r','i','z']}
-    for b in ['g','r','i','z']:
-        #gb=np.where(bands==b)[0]
-        if ((len(gsdss)>0)&(len(gdes)>0)):
-            gsdssb,gdesb=np.where(bands[gsdss]==b)[0],np.where(bands[gdes]==b)[0]
-            if ((len(gsdssb)>0)&(len(gdesb)>0)):
-                magpairs=np.zeros([len(gsdssb)*len(gdesb),2])
-                magpairs[:,1],magpairs[:,0]=np.repeat(mag[gsdss[gsdssb]],len(gdesb)),np.tile(mag[gdes[gdesb]],len(gsdssb))
-                magerrpairs=np.zeros([len(gsdssb)*len(gdesb),2])
-                magerrpairs[:,1],magerrpairs[:,0]=np.repeat(magerr[gsdss[gsdssb]],len(gdesb)),np.tile(magerr[gdes[gdesb]],len(gsdssb))
-                magdiffs,differrs=magpairs[:,0]-magpairs[:,1],np.sqrt(np.sum(magerrpairs**2,axis=1))
-                ipairs=np.zeros([len(gsdssb)*len(gdesb),2])
-                ipairs[:,1],ipairs[:,0]=np.repeat(gsdss[gsdssb],len(gdesb)),np.tile(gdes[gdesb],len(gsdssb))
-                diffsigs=magdiffs/differrs
-                gsig=np.where(diffsigs>3)[0]
-                if len(gsig)>0:
-                    gmax=np.argsort(diffsigs[gsig])[-1]
-                    imax,imin=ipairs[:,1][gsig[gmax]],ipairs[:,0][gsig[gmax]]
-                    bestdiff[b]['diff']=np.max(diffsigs[gsig])
-                    bestdiff[b]['ihi'],bestdiff[b]['ilo']=imax,imin
+    #for b in ['g','r','i','z']:
+    for b in ['g']:
+        gb=np.where(bands==b)[0]
+        #if ((len(gsdss)>0)&(len(gdes)>0)):
+        #    gsdssb,gdesb=np.where(bands[gsdss]==b)[0],np.where(bands[gdes]==b)[0]
+        #    if ((len(gsdssb)>0)&(len(gdesb)>0)):
+        if len(gb)>0:
+            magpairs=np.zeros([len(gb)*len(gb),2])
+            magpairs[:,1],magpairs[:,0]=np.repeat(mag[gb]],len(gb)),np.tile(mag[gb]],len(gb))
+            magerrpairs=np.zeros([len(gb)*len(gb),2])
+            magerrpairs[:,1],magerrpairs[:,0]=np.repeat(magerr[gb]],len(gb)),np.tile(magerr[gb]],len(gb))
+            magdiffs,differrs=magpairs[:,0]-magpairs[:,1],np.max(magerrpairs,axis=1)#,np.sqrt(np.sum(magerrpairs**2,axis=1))
+            ipairs=np.zeros([len(gb)*len(gb),2])
+            ipairs[:,1],ipairs[:,0]=np.repeat(gb],len(gb)),np.tile(gb],len(gb))
+            diffsigs=magdiffs/differrs
+            gsig=np.where(differrs<0.15)[0]
+            if len(gsig)>0:
+                gmax=np.argsort(magdiffs[gsig])[-1]
+                imax,imin=ipairs[:,1][gsig[gmax]],ipairs[:,0][gsig[gmax]]
+                bestdiff[b]['diff']=np.max(magdiffs[gsig])
+                bestdiff[b]['ihi'],bestdiff[b]['ilo']=imax,imin
     fig=plt.figure(1)
     fig.clf()
     ax3=plt.subplot2grid((2,10),(1,0),colspan=6)
