@@ -295,14 +295,6 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
         cr=np.loadtxt('%s/%s/LC.tab'%(DBdir,DBID),dtype={'names':('DatabaseID','Survey','SurveyCoaddID','SurveyObjectID','RA','DEC','MJD','TAG','BAND','MAGTYPE','MAG','MAGERR','FLAG'),'formats':('|S64','|S20','|S20','|S20','f8','f8','f8','|S20','|S12','|S12','f8','f8','i8')},skiprows=1)
         if calc_outliers: outlier_arr=np.zeros(len(cr),dtype='bool')
         gorig=np.arange(len(cr))[(cr['MAG']>0)&(cr['MAG']<30)&(cr['MAGERR']<5)]
-        if calc_outliers:
-            gb=np.where(cr['BAND']=='g')[0]
-            for ipt in np.arange(len(gb)):
-                gthresh=np.where(np.abs(cr['MJD'][gb]-cr['MJD'][gb[ipt]])<outlier_window)[0]
-                if len(gthresh)>2:
-                    outlier_arr[gorig[ipt]]= np.abs(np.median(cr['MAG'][gb[gthresh]])-cr['MAG'][gb[ipt]]) > outlier_thresh
-            np.savetxt('%s/%s/outliers.tab'%(DBdir,DBID),outlier_arr)
-            outlier_arr=outlier_arr[gorig]
         cr=cr[(cr['MAG']>0)&(cr['MAG']<30)&(cr['MAGERR']<5)]
         gdes=np.where(cr['Survey']=='DES')[0]
         if ((len(gdes)>1)&(convertDESmags)):
@@ -333,6 +325,14 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
                 dum2,newz=DES2SDSS_iz(medi,cr['MAG'][gdes][gz])
                 cr['MAG'][gdes[gi]],cr['MAG'][gdes[gz]]=newi,newz
         mjd,mag,magerr,bands,survey=cr['MJD'],cr['MAG'],cr['MAGERR'],cr['BAND'],cr['Survey']
+        if calc_outliers:
+            gb=np.where(bands=='g')[0]
+            for ipt in np.arange(len(gb)):
+                gthresh=np.where(np.abs(mjd[gb]-mjd[gb[ipt]])<outlier_window)[0]
+                if len(gthresh)>2:
+                    outlier_arr[gorig[gb[ipt]]]= np.abs(np.median(mag[gb[gthresh]])-mag[gb[ipt]]) > outlier_thresh
+            np.savetxt('%s/%s/outliers.tab'%(DBdir,DBID),outlier_arr)
+            outlier_arr=outlier_arr[gorig]
         plot_lightcurve(DBID,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage,specfile=specfile,DESfname=DESfname,WavLL=WavLL,WavUL=WavUL,outlierflag=outlierflags[idb],zoominband=zoominband,outlierarr=outlier_arr)
     psfpage.close()
 
