@@ -244,7 +244,7 @@ def DES2SDSS_iz(i,z):
     return (-89*np.sqrt(-96000*i+96000*z+181561)+8000*z+37827)/8000.,(-17*np.sqrt(-96000*i+96000*z+181561)+24000*z+6731)/24000.
 
 def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A1',WavLL=3000,WavUL=10500,convertDESmags=False,outlierflags=None,zoominband=None,calc_outliers=False,outlier_window=300,outlier_thresh=0.5):
-    if np.shape(outlierflags)==(): outlierflags=np.zeros(len(DBIDS))
+    if np.shape(outlierflags)==(): outlierflags=np.zeros(len(DBIDs))
     hdu=py.open('%s/masterfile.fits'%DBdir)
     data=hdu[1].data
     psfpage=bpdf.PdfPages(outputfile)
