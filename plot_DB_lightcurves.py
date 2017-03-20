@@ -180,6 +180,7 @@ def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage=
         plot_band(ax3,mjd,mag,magerr,bands,zoominband,connectpoints=connectpoints,nolabels=False,outlierarr=outlierarr)
         plt.axvline(mjd[imax],ls='dashed',lw=1,color='r')
         plt.axvline(mjd[imin],ls='dashed',lw=1,color='b')
+        ylim=plt.ylim()
         if ylim[1]>30:
             ylim=(ylim[0],np.max(mag)+0.1)
         if ylim[1]>30: ylim=(ylim[0],30)
