@@ -71,6 +71,7 @@ def plot_band(ax,mjd,mag,magerr,cbands,band,connectpoints=True,nolabels=False,ou
     else:
         ax.scatter(mjd[gband][g100],magplot[g100],color=curcol,label=band,zorder=20,edgecolor='k')
     try:
+        print outlier_set.keys()
         for outlier_set in outlierarr.keys():
             gout=np.intersect1d(np.arange(len(mag))[outlierarr[outlier_set]['g']],gband[g100])
             if outlierarr[outlier_set]['marker']=='x':
