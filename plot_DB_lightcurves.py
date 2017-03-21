@@ -341,6 +341,7 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
                 outliercolorarr=['red','cyan','green','blue','orange','magenta']
                 outliermarkerarr=['x','+','d','o','*']
                 for w,iw in zip(outlier_window,np.arange(len(outlier_window))):
+                    print w,iw
                     outlier_arr={w: {'g': np.zeros(len(mag),dtype='bool'), 'c': outliercolorarr[iw], 'marker': outliermarkerarr[iw]}}
                     for ipt in np.arange(len(gb)):
                         gthresh=np.where(np.abs(mjd[gb]-mjd[gb[ipt]])<w)[0]
