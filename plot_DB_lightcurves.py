@@ -73,7 +73,7 @@ def plot_band(ax,mjd,mag,magerr,cbands,band,connectpoints=True,nolabels=False,ou
     try:
         for outlier_set in outlierarr.keys():
             gout=np.intersect1d(np.arange(len(mag))[outlierarr[outlier_set]['g']],gband[g100])
-            ax.scatter(mjd[gout],mag[gout],color=outlierarr[outlier_set]['c'],marker=outlierarr[outlier_set]['marker'],lw=3,s=50,zorder=50)
+            ax.scatter(mjd[gout],mag[gout],color=outlierarr[outlier_set]['c'],marker=outlierarr[outlier_set]['marker'],lw=2,s=50,zorder=50)
     except:
         if np.shape(outlierarr)!=():
             gout=np.intersect1d(np.arange(len(mag))[outlierarr],gband[g100])
