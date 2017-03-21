@@ -336,6 +336,7 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
         mjd,mag,magerr,bands,survey=cr['MJD'],cr['MAG'],cr['MAGERR'],cr['BAND'],cr['Survey']
         if calc_outliers:
             gb=np.where(bands=='g')[0]
+            print outlier_window,np.shape(outlier_window)
             if np.shape(outlier_window)!=():
                 outliercolorarr=['red','cyan','green','blue','orange','magenta']
                 outliermarkerarr=['x','+','d','o','*']
