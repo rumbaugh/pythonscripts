@@ -65,7 +65,7 @@ def plot_band(ax,mjd,mag,magerr,cbands,band,connectpoints=True,nolabels=False,ou
     if connectpoints:
         gsort=np.argsort(mjd[gband][g100])
         ax.plot(mjd[gband][g100][gsort],magplot[g100][gsort],color=curcol,lw=2,zorder=15)
-    ax.errorbar(mjd[gband][g100],magplot[g100],yerr=magploterr[g100],color=curcol,fmt='ro',lw=2,capsize=3,mew=1,zorder=-30)
+    ax.errorbar(mjd[gband][g100],magplot[g100],yerr=magploterr[g100],color=curcol,fmt='r',lw=2,capsize=3,mew=1,zorder=-30)
     if nolabels:
         ax.scatter(mjd[gband][g100],magplot[g100],color=curcol,zorder=20)
     else:
