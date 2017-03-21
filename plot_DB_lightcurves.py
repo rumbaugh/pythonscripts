@@ -72,7 +72,7 @@ def plot_band(ax,mjd,mag,magerr,cbands,band,connectpoints=True,nolabels=False,ou
         ax.scatter(mjd[gband][g100],magplot[g100],color=curcol,label=band,zorder=20)
     if np.shape(outlierarr)!=():
         gout=np.intersect1d(np.arange(len(mag))[outlierarr],gband[g100])
-        ax.scatter(mjd[gout],mag[gout],color='r',marker='x',lw=3,s=50)
+        ax.scatter(mjd[gout],mag[gout],color='r',marker='x',lw=3,s=50,zorder=50)
     #return
 
 
