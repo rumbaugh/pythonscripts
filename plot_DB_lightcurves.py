@@ -64,12 +64,12 @@ def plot_band(ax,mjd,mag,magerr,cbands,band,connectpoints=True,nolabels=False,ou
         return
     if connectpoints:
         gsort=np.argsort(mjd[gband][g100])
-        ax.plot(mjd[gband][g100][gsort],magplot[g100][gsort],color=curcol,lw=2,zorder=-30)
-    ax.errorbar(mjd[gband][g100],magplot[g100],yerr=magploterr[g100],color=curcol,fmt='ro',lw=2,capsize=3,mew=1,zorder=-32)
+        ax.plot(mjd[gband][g100][gsort],magplot[g100][gsort],color=curcol,lw=2,zorder=15)
+    ax.errorbar(mjd[gband][g100],magplot[g100],yerr=magploterr[g100],color=curcol,fmt='ro',lw=2,capsize=3,mew=1,zorder=-30)
     if nolabels:
-        ax.scatter(mjd[gband][g100],magplot[g100],color=curcol,zorder=-20)
+        ax.scatter(mjd[gband][g100],magplot[g100],color=curcol,zorder=20)
     else:
-        ax.scatter(mjd[gband][g100],magplot[g100],color=curcol,label=band,zorder=-20)
+        ax.scatter(mjd[gband][g100],magplot[g100],color=curcol,label=band,zorder=20)
     if np.shape(outlierarr)!=():
         gout=np.intersect1d(np.arange(len(mag))[outlierarr],gband[g100])
         ax.scatter(mjd[gout],mag[gout],color='r',marker='x',lw=3,s=50)
