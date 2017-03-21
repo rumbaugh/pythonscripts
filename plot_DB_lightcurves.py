@@ -341,6 +341,8 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
                         gthresh=np.where(np.abs(mjd[gb]-mjd[gb[ipt]])<w)[0]
                         if len(gthresh)>2:
                             outlier_arr[w]['g'][gb[ipt]]= np.abs(np.median(mag[gb[gthresh]])-mag[gb[ipt]]) > outlier_thresh
+                        elif len(gthresh)==2:
+                            outlier_arr[w]['g'][gb[ipt]]= np.abs(np.median(mag[gb[gthresh]])-mag[gb[ipt]]) > outlier_thresh
             else:
                 outlier_arr=np.zeros(len(cr),dtype='bool')
                 for ipt in np.arange(len(gb)):
