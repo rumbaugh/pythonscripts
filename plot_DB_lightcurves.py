@@ -70,9 +70,7 @@ def plot_band(ax,mjd,mag,magerr,cbands,band,connectpoints=True,nolabels=False,ou
         ax.scatter(mjd[gband][g100],magplot[g100],color=curcol,zorder=20,edgecolor='k')
     else:
         ax.scatter(mjd[gband][g100],magplot[g100],color=curcol,label=band,zorder=20,edgecolor='k')
-    print outlierarr
     try:
-        print outlierarr.keys()
         for outlier_set in outlierarr.keys():
             gout=np.intersect1d(np.arange(len(mag))[outlierarr[outlier_set]['g']],gband[g100])
             if outlierarr[outlier_set]['marker']=='x':
@@ -336,13 +334,12 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
         mjd,mag,magerr,bands,survey=cr['MJD'],cr['MAG'],cr['MAGERR'],cr['BAND'],cr['Survey']
         if calc_outliers:
             gb=np.where(bands=='g')[0]
-            print outlier_window,np.shape(outlier_window)
             if np.shape(outlier_window)!=():
                 outliercolorarr=['red','cyan','green','blue','orange','magenta']
                 outliermarkerarr=['x','+','d','o','*']
+                outlier_arr={}
                 for w,iw in zip(outlier_window,np.arange(len(outlier_window))):
-                    print w,iw
-                    outlier_arr={w: {'g': np.zeros(len(mag),dtype='bool'), 'c': outliercolorarr[iw], 'marker': outliermarkerarr[iw]}}
+                    outlier_arr[w]= {'g': np.zeros(len(mag),dtype='bool'), 'c': outliercolorarr[iw], 'marker': outliermarkerarr[iw]}
                     for ipt in np.arange(len(gb)):
                         gthresh=np.where(np.abs(mjd[gb]-mjd[gb[ipt]])<w)[0]
                         if len(gthresh)>2:
