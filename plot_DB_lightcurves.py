@@ -315,6 +315,7 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
                 crmac=None
         else:
             crmac=None
+        if calc_outliers: outlier_arr=np.zeros(len(cr),dtype='bool')
         gorig=np.arange(len(cr))[(cr['MAG']>0)&(cr['MAG']<30)&(cr['MAGERR']<5)]
         cr=cr[(cr['MAG']>0)&(cr['MAG']<30)&(cr['MAGERR']<5)]
         gdes=np.where(cr['Survey']=='DES')[0]
@@ -361,13 +362,16 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
                         elif len(gthresh)==2:
                             outlier_arr[w]['g'][gb[ipt]]= np.abs(np.median(mag[gb[gthresh]])-mag[gb[ipt]]) > outlier_thresh
             else:
-                outlier_arr=np.zeros(len(cr),dtype='bool')
                 for ipt in np.arange(len(gb)):
                     gthresh=np.where(np.abs(mjd[gb]-mjd[gb[ipt]])<outlier_window)[0]
                     if len(gthresh)>2:
                         outlier_arr[gorig[gb[ipt]]]= np.abs(np.median(mag[gb[gthresh]])-mag[gb[ipt]]) > outlier_thresh
+                    elif len(gthresh)==2:
+                        outlier_arr[gorig[gb[ipt]]]= np.abs(np.median(mag[gb[gthresh]])-mag[gb[ipt]]) > outlier_thresh
                 np.savetxt('%s/%s/outliers.tab'%(DBdir,DBID),outlier_arr)
                 outlier_arr=outlier_arr[gorig]
+        else:
+            outlierarr=None
         if np.shape(crmac)!=():
             mjd,mag,magerr,bands=(mjd,crmac['MJD']),(mag,crmac['MAG']),(magerr,crmac['MAGERR']),(bands,crmac['BAND'])
         plot_lightcurve(DBID,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage,specfile=specfile,DESfname=DESfname,WavLL=WavLL,WavUL=WavUL,outlierflag=outlierflags[idb],zoominband=zoominband,outlierarr=outlier_arr,connectpoints=connectpoints)
