@@ -86,7 +86,7 @@ def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage=
     try:
         test1=mjd.index
         plotmacleod=True
-        mjd,mag,magerr,bands,mjdmc,magmc,magerrmc,bandsmc=mag[0],mag[0],magerr[0],bands[0],mag[1],mag[1],magerr[1],bands[1]
+        mjd,mag,magerr,bands,mjdmc,magmc,magerrmc,bandsmc=mjd[0],mag[0],magerr[0],bands[0],mjd[1],mag[1],magerr[1],bands[1]
     except:
         plotmacleod=False
     bcens={'u': 3876.63943790537, 'g': 4841.83358196563, 'r': 6438/534828217, 'i': 7820.99282740933, 'z': 9172.34266385718, 'Y': 9877.80238651117}
