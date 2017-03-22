@@ -310,14 +310,13 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
         if plotmacleod:
             try:
                 crmac=np.loadtxt('%s/%s/Macleod_LC.tab'%(DBdir,DBID),dtype={'names':('DatabaseID','RA','DEC','MJD','BAND','MAG','MAGERR','FLAG'),'formats':('i8','f8','f8','f8','|S4','f8','f8','i8')})
-                print np.shape(crmac)
+                crmac=crmac[(crmac['MAG']>0)&(crmac['MAG']<30)&(crmac['MAGERR']<5)]
             except:
                 crmac=None
         else:
             crmac=None
         gorig=np.arange(len(cr))[(cr['MAG']>0)&(cr['MAG']<30)&(cr['MAGERR']<5)]
         cr=cr[(cr['MAG']>0)&(cr['MAG']<30)&(cr['MAGERR']<5)]
-        crmac=crmac[(crmac['MAG']>0)&(crmac['MAG']<30)&(crmac['MAGERR']<5)]
         gdes=np.where(cr['Survey']=='DES')[0]
         if ((len(gdes)>1)&(convertDESmags)):
             gg,gr=np.where(cr['BAND'][gdes]=='g')[0],np.where(cr['BAND'][gdes]=='r')[0]
