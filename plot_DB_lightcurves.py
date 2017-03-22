@@ -26,11 +26,11 @@ def plot_flux(ax,fluxes,fluxerrs=None,label=None,curcol='k',bands=np.array(['g',
     else:
         return
     if label==None:
-        if fluxerrs!=None:ax.errorbar(cens,fluxes,yerr=fluxerrs,color=curcol,fmt='ro',lw=2,capsize=3,mew=1,zorder=3,label=None)
+        if fluxerrs!=None:ax.errorbar(cens,fluxes,yerr=fluxerrs,color=curcol,fmt=' ',lw=2,capsize=3,mew=1,zorder=3,label=None)
         ax.scatter(cens,fluxes,color=curcol,s=36,zorder=4)
     else:
         ax.scatter(cens,fluxes,color=curcol,s=36,label=label,zorder=4)
-        if fluxerrs!=None:ax.errorbar(cens,fluxes,yerr=fluxerrs,color=curcol,fmt='ro',lw=2,capsize=3,mew=1,zorder=3,label=None)
+        if fluxerrs!=None:ax.errorbar(cens,fluxes,yerr=fluxerrs,color=curcol,fmt=' ',lw=2,capsize=3,mew=1,zorder=3,label=None)
 
 def calc_flux(mjd,mag,magerr,cbands,band,mjdcen):
     gband=np.where(cbands==band)[0]
@@ -66,7 +66,7 @@ def plot_band(ax,mjd,mag,magerr,cbands,band,connectpoints=True,nolabels=False,ou
     gsort=np.argsort(mjd[gband][g100])
     if connectpoints:
         ax.plot(mjd[gband][g100][gsort],magplot[g100][gsort],color=curcol,lw=2,zorder=15)
-    ax.errorbar(mjd[gband][g100][gsort],magplot[g100][gsort],yerr=magploterr[g100],color=curcol,fmt='r',lw=2,capsize=3,mew=1,zorder=-30)
+    ax.errorbar(mjd[gband][g100][gsort],magplot[g100][gsort],yerr=magploterr[g100],color=curcol,fmt=' ',lw=2,capsize=3,mew=1,zorder=-30)
     if nolabels:
         ax.scatter(mjd[gband][g100],magplot[g100],color=curcol,zorder=20,edgecolor='k')
     else:
