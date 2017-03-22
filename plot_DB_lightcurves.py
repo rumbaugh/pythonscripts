@@ -51,7 +51,7 @@ def calc_flux(mjd,mag,magerr,cbands,band,mjdcen):
         mederr=mederr[0]
     return 10**(medmag/-2.5),np.abs(np.log(10)/-2.5*10**(medmag/-2.5)*mederr)
 
-def plot_band(ax,mjd,mag,magerr,cbands,band,connectpoints=True,nolabels=False,outlierarr=None):
+def plot_band(ax,mjd,mag,magerr,cbands,band,connectpoints=True,nolabels=False,outlierarr=None,overridecolor=None):
     gband=np.where(cbands==band)[0]
     magplot=mag[gband]
     magploterr=magerr[gband]
@@ -62,6 +62,7 @@ def plot_band(ax,mjd,mag,magerr,cbands,band,connectpoints=True,nolabels=False,ou
     except KeyError:
         print '%s is not a valid band'%band
         return
+    if overridecolor!=None: curcol=overridecolor
     gsort=np.argsort(mjd[gband][g100])
     if connectpoints:
         ax.plot(mjd[gband][g100][gsort],magplot[g100][gsort],color=curcol,lw=2,zorder=15)
@@ -82,6 +83,12 @@ def plot_band(ax,mjd,mag,magerr,cbands,band,connectpoints=True,nolabels=False,ou
 
 
 def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage=None,fname=None,DESfname=None,connectpoints=True,specfile=None,WavLL=3000,WavUL=10500,outlierflag=0,zoominband=None,outlierarr=None):
+    try:
+        test1=mjd.index
+        plotmacleod=True
+        mjd,mag,magerr,bands,mjdmc,magmc,magerrmc,bandsmc=mag[0],mag[0],magerr[0],bands[0],mag[1],mag[1],magerr[1],bands[1]
+    except:
+        plotmacleod=False
     bcens={'u': 3876.63943790537, 'g': 4841.83358196563, 'r': 6438/534828217, 'i': 7820.99282740933, 'z': 9172.34266385718, 'Y': 9877.80238651117}
     VBfile='%s/VanderBerk_datafile1.txt'%DBdir
     crv=np.loadtxt(VBfile,skiprows=23)
@@ -183,6 +190,8 @@ def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage=
             plt.ylim(-0.05,1.15*maxplot)
     else:
         plot_band(ax3,mjd,mag,magerr,bands,zoominband,connectpoints=connectpoints,nolabels=False,outlierarr=outlierarr)
+        if plotmacleod:
+            plot_band(ax3,mjdmc,magmc,magerrmc,bandsmc,zoominband,connectpoints=connectpoints,nolabels=False,overridecolor='magenta')
         plt.axvline(mjd[imax],ls='dashed',lw=1,color='r')
         plt.axvline(mjd[imin],ls='dashed',lw=1,color='b')
         ylim=plt.ylim()
@@ -248,7 +257,7 @@ def DES2SDSS_gr(g,r):
 def DES2SDSS_iz(i,z):
     return (-89*np.sqrt(-96000*i+96000*z+181561)+8000*z+37827)/8000.,(-17*np.sqrt(-96000*i+96000*z+181561)+24000*z+6731)/24000.
 
-def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A1',WavLL=3000,WavUL=10500,convertDESmags=False,outlierflags=None,zoominband=None,calc_outliers=False,outlier_window=300,outlier_thresh=0.5):
+def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A1',WavLL=3000,WavUL=10500,convertDESmags=False,outlierflags=None,zoominband=None,calc_outliers=False,outlier_window=300,outlier_thresh=0.5,plotmacleod=False):
     if np.shape(outlierflags)==(): outlierflags=np.zeros(len(DBIDs))
     hdu=py.open('%s/masterfile.fits'%DBdir)
     data=hdu[1].data
@@ -298,8 +307,16 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
         else:
             specfile=None
         cr=np.loadtxt('%s/%s/LC.tab'%(DBdir,DBID),dtype={'names':('DatabaseID','Survey','SurveyCoaddID','SurveyObjectID','RA','DEC','MJD','TAG','BAND','MAGTYPE','MAG','MAGERR','FLAG'),'formats':('|S64','|S20','|S20','|S20','f8','f8','f8','|S20','|S12','|S12','f8','f8','i8')},skiprows=1)
+        if plotmacleod:
+            try:
+                crmac=np.loadtxt('%s/%s/Macleod_LC.tab'%(DBdir,DBID),dtype={'names':('DatabaseID','RA','DEC','MJD','BAND','MAG','MAGERR','FLAG'),'formats':('i8','f8','f8','f8','|S4','f8','f8','i8')})
+            except:
+                crmac=None
+        else:
+            crmac=None
         gorig=np.arange(len(cr))[(cr['MAG']>0)&(cr['MAG']<30)&(cr['MAGERR']<5)]
         cr=cr[(cr['MAG']>0)&(cr['MAG']<30)&(cr['MAGERR']<5)]
+        crmac=crmac[(crmac['MAG']>0)&(crmac['MAG']<30)&(crmac['MAGERR']<5)]
         gdes=np.where(cr['Survey']=='DES')[0]
         if ((len(gdes)>1)&(convertDESmags)):
             gg,gr=np.where(cr['BAND'][gdes]=='g')[0],np.where(cr['BAND'][gdes]=='r')[0]
@@ -351,6 +368,8 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
                         outlier_arr[gorig[gb[ipt]]]= np.abs(np.median(mag[gb[gthresh]])-mag[gb[ipt]]) > outlier_thresh
                 np.savetxt('%s/%s/outliers.tab'%(DBdir,DBID),outlier_arr)
                 outlier_arr=outlier_arr[gorig]
+        if np.shape(crmac)!=():
+            mjd,mag,magerr,bands=(mjd,crmac['MJD']),(mag,crmac['MAG']),(magerr,crmac['MAGERR']),(bands,crmac['BAND'])
         plot_lightcurve(DBID,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage,specfile=specfile,DESfname=DESfname,WavLL=WavLL,WavUL=WavUL,outlierflag=outlierflags[idb],zoominband=zoominband,outlierarr=outlier_arr)
     psfpage.close()
 
