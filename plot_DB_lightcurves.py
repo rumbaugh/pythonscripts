@@ -319,20 +319,24 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
                     if load_macleod:
                         try:
                             croutmac=np.loadtxt('%s/%s/outliers_Macleod.tab'%(DBdir,DBID),dtype='i8')
+                            crmac=crmac[croutmac>-1]
+                            croutmac=croutmac[croutmac>-1]
+                            outlier_arr=np.array(np.append(crout,croutmac),dtype='bool')
                         except:
                             try:
                                 croutmac=-np.ones(len(crmac))
                                 crmac=crmac[croutmac>-1]
                                 croutmac=croutmac[croutmac>-1]
                                 outlier_arr=np.array(np.append(crout,croutmac),dtype='bool')
-                            except IndexError:
-                                croutmac=-np.ones(1)
-                                crmac=crmac[croutmac>-1]
-                                croutmac=croutmac[croutmac>-1]
-                                outlier_arr=np.array(np.append(crout,croutmac),dtype='bool')
                             except TypeError:
-                                croutmac=np.ones(0)
-                                outlier_arr=np.array(crout,dtype='bool')
+                                if crmac!=None:
+                                    croutmac=-np.ones(1)
+                                    crmac=crmac[croutmac>-1]
+                                    croutmac=croutmac[croutmac>-1]
+                                    outlier_arr=np.array(np.append(crout,croutmac),dtype='bool')
+                                else:
+                                    croutmac=np.ones(0)
+                                    outlier_arr=np.array(crout,dtype='bool')
                             
                     else:
                         outlier_arr=np.array(crout,dtype='bool')
