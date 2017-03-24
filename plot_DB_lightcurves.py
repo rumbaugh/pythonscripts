@@ -356,9 +356,11 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
             outlier_arr=np.zeros(len(cr),dtype='bool')
         if load_macleod:
             if crmac!=None:
-                newcr=np.zeros((len(cr),),dtype={'names':('DatabaseID','RA','DEC','MJD','BAND','MAG','MAGERR','FLAG'),'formats':('|S24','f8','f8','f8','|S4','f8','f8','i8')})
-                newcr['DatabaseID'],newcr['RA'],newcr['DEC'],newcr['MJD'],newcr['BAND'],newcr['MAG'],newcr['MAGERR'],newcr['FLAG']=cr['DatabaseID'],cr['RA'],cr['DEC'],cr['MJD'],cr['BAND'],cr['MAG'],cr['MAGERR'],cr['FLAG']
-                cr=np.append(newcr,crmac)
+                newcr=np.zeros((len(cr),),dtype={'names':('DatabaseID','SURVEY','RA','DEC','MJD','BAND','MAG','MAGERR','FLAG'),'formats':('|S24','f8','f8','f8','|S4','f8','f8','i8')})
+                newcr['DatabaseID'],newcr['SURVEY'],newcr['RA'],newcr['DEC'],newcr['MJD'],newcr['BAND'],newcr['MAG'],newcr['MAGERR'],newcr['FLAG']=cr['DatabaseID'],cr['SURVEY'],cr['RA'],cr['DEC'],cr['MJD'],cr['BAND'],cr['MAG'],cr['MAGERR'],cr['FLAG']
+                newcrmac=np.zeros((len(crmac),),dtype={'names':('DatabaseID','SURVEY','RA','DEC','MJD','BAND','MAG','MAGERR','FLAG'),'formats':('|S24','f8','f8','f8','|S4','f8','f8','i8')})
+                newcrmac['DatabaseID'],newcrmac['SURVEY'],newcrmac['RA'],newcrmac['DEC'],newcrmac['MJD'],newcrmac['BAND'],newcrmac['MAG'],newcrmac['MAGERR'],newcrmac['FLAG']=crmac['DatabaseID'],np.full(len(crmac),'SDSS'),crmac['RA'],crmac['DEC'],crmac['MJD'],crmac['BAND'],crmac['MAG'],crmac['MAGERR'],crmac['FLAG']
+                cr=np.append(newcr,newcrmac)
         gorig=np.arange(len(cr))[(cr['MAG']>0)&(cr['MAG']<30)&(cr['MAGERR']<5)]
         cr=cr[(cr['MAG']>0)&(cr['MAG']<30)&(cr['MAGERR']<5)]
         gdes=np.where(cr['Survey']=='DES')[0]
