@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 
-def ConstructStructureFunctionArray(S,ltime,Serr=None,fullerror=True):
+def ConstructStructureFunctionArray(S,ltime,Serr=None):
     Varr = np.zeros(0)
     tauarr = np.zeros(0)
     if len(S) != len(ltime): sys.exit("S and ltime don't have same dimensions.")
@@ -17,10 +17,8 @@ def ConstructStructureFunctionArray(S,ltime,Serr=None,fullerror=True):
     if Serr != None: 
         err1,err2=np.repeat(Serr,len(S)**2),np.tile(Serr,len(S)**2)
         err1,err2=err1[g12],err2[g12]
-        if fullerror:
-            Verr=2*np.abs(S1-S2)*np.sqrt(err1**2+err2**2)
-        else:
-            Verr=np.sqrt(err1**2+err2**2)
+        #Verr=2*np.abs(S1-S2)*np.sqrt(err1**2+err2**2)
+        Verr=err1**2+err2**2
     as_tauarr = np.argsort(tauarr)
     SFarr = np.zeros((len(tauarr),2))
     if Serr != None: SFarr = np.zeros((len(tauarr),3))
@@ -43,7 +41,6 @@ def CalcStructureFunction_eq14(S,ltime,nbins=10):
 
 def CalcStructureFunction_eq15(S,ltime,Serr,nbins=10):
     SF_arr=ConstructStructureFunctionArray(S,ltime,Serr)
-    SF_arr[:,2]*=SF_arr[:,2]
     npairs = np.shape(SF_arr)[0]
     binsize = npairs/nbins
     binsize0 = binsize + np.mod(npairs,nbins)
@@ -57,7 +54,6 @@ def CalcStructureFunction_eq15(S,ltime,Serr,nbins=10):
 
 def CalcStructureFunction_eq16(S,ltime,Serr,nbins=10):
     SF_arr=ConstructStructureFunctionArray(S,ltime,Serr)
-    SF_arr[:,2]*=SF_arr[:,2]
     npairs = np.shape(SF_arr)[0]
     binsize = npairs/nbins
     binsize0 = binsize + np.mod(npairs,nbins)
