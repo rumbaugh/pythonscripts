@@ -335,7 +335,6 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
                 if load_outliers:
                     try:
                         crout=np.loadtxt('%s/%s/outliers.tab'%(DBdir,DBID),dtype='i8')
-                        print len(cr),len(crout)
                     except:
                         crout=np.zeros(len(cr))
                     outlier_arr=np.array(crout,dtype='bool')
