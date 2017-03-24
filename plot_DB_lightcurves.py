@@ -257,7 +257,7 @@ def DES2SDSS_gr(g,r):
 def DES2SDSS_iz(i,z):
     return (-89*np.sqrt(-96000*i+96000*z+181561)+8000*z+37827)/8000.,(-17*np.sqrt(-96000*i+96000*z+181561)+24000*z+6731)/24000.
 
-def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A1',WavLL=3000,WavUL=10500,convertDESmags=False,outlierflags=None,zoominband=None,calc_outliers=False,outlier_window=300,outlier_thresh=0.5,plotmacleod=False,connectpoints=True):
+def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A1',WavLL=3000,WavUL=10500,convertDESmags=False,outlierflags=None,zoominband=None,calc_outliers=False,outlier_window=300,outlier_thresh=0.5,plotmacleod=False,connectpoints=True,load_macleod=False,load_outliers=False):
     if np.shape(outlierflags)==(): outlierflags=np.zeros(len(DBIDs))
     hdu=py.open('%s/masterfile.fits'%DBdir)
     data=hdu[1].data
@@ -307,7 +307,7 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
         else:
             specfile=None
         cr=np.loadtxt('%s/%s/LC.tab'%(DBdir,DBID),dtype={'names':('DatabaseID','Survey','SurveyCoaddID','SurveyObjectID','RA','DEC','MJD','TAG','BAND','MAGTYPE','MAG','MAGERR','FLAG'),'formats':('|S64','|S20','|S20','|S20','f8','f8','f8','|S20','|S12','|S12','f8','f8','i8')},skiprows=1)
-        if plotmacleod:
+        if ((plotmacleod)|(load_macleod)):
             try:
                 crmac=np.loadtxt('%s/%s/Macleod_LC.tab'%(DBdir,DBID),dtype={'names':('DatabaseID','RA','DEC','MJD','BAND','MAG','MAGERR','FLAG'),'formats':('i8','f8','f8','f8','|S4','f8','f8','i8')})
                 crmac=crmac[(crmac['MAG']>0)&(crmac['MAG']<30)&(crmac['MAGERR']<5)]
@@ -315,7 +315,32 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
                 crmac=None
         else:
             crmac=None
-        if calc_outliers: outlier_arr=np.zeros(len(cr),dtype='bool')
+        if load_outliers:
+            try:
+                crout=np.loadtxt('%s/%s/outliers.tab'%(DBdir,DBID),dtype='i8')
+            except:
+                crout=np.zeros(len(cr))
+            if load_macleod:
+                try:
+                    croutmac=np.loadtxt('%s/%s/outliers_Macleod.tab'%(DBdir,DBID),dtype='i8')
+                except:
+                    try:
+                        croutmac=-np.ones(len(crmac))
+                    except IndexError:
+                        if crmac!=None: 
+                            croutmac=-np.ones(1)
+                        else:
+                            croutmac=np.ones(0)
+                                
+                crmac=crmac[croutmac>-1]
+                croutmac=croutmac[croutmac>-1]
+                outlier_arr=np.array(np.append(crout,croutmac),dtype='bool')
+            else:
+                outlier_arr=np.array(crout,dtype='bool')
+        elif calc_outliers: 
+            outlier_arr=np.zeros(len(cr),dtype='bool')
+        if load_macleod:
+            cr=np.append(cr,crmac)
         gorig=np.arange(len(cr))[(cr['MAG']>0)&(cr['MAG']<30)&(cr['MAGERR']<5)]
         cr=cr[(cr['MAG']>0)&(cr['MAG']<30)&(cr['MAGERR']<5)]
         gdes=np.where(cr['Survey']=='DES')[0]
@@ -347,7 +372,7 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
                 dum2,newz=DES2SDSS_iz(medi,cr['MAG'][gdes][gz])
                 cr['MAG'][gdes[gi]],cr['MAG'][gdes[gz]]=newi,newz
         mjd,mag,magerr,bands,survey=cr['MJD'],cr['MAG'],cr['MAGERR'],cr['BAND'],cr['Survey']
-        if calc_outliers:
+        if ((calc_outliers)&(not(load_macleod))):
             gb=np.where(bands=='g')[0]
             if np.shape(outlier_window)!=():
                 outliercolorarr=['red','cyan','green','blue','orange','magenta']
@@ -370,9 +395,9 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
                         outlier_arr[gorig[gb[ipt]]]= np.abs(np.median(mag[gb[gthresh]])-mag[gb[ipt]]) > outlier_thresh
                 np.savetxt('%s/%s/outliers.tab'%(DBdir,DBID),outlier_arr)
                 outlier_arr=outlier_arr[gorig]
-        else:
-            outlierarr=None
-        if np.shape(crmac)!=():
+        elif not(load_macleod):
+            outlier_arr=None
+        if ((np.shape(crmac)!=())&(not(load_macleod))):
             mjd,mag,magerr,bands=(mjd,crmac['MJD']),(mag,crmac['MAG']),(magerr,crmac['MAGERR']),(bands,crmac['BAND'])
         plot_lightcurve(DBID,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage,specfile=specfile,DESfname=DESfname,WavLL=WavLL,WavUL=WavUL,outlierflag=outlierflags[idb],zoominband=zoominband,outlierarr=outlier_arr,connectpoints=connectpoints)
     psfpage.close()
