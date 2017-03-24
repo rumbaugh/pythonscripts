@@ -327,10 +327,9 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
                     try:
                         croutmac=-np.ones(len(crmac))
                     except IndexError:
-                        if crmac!=None: 
-                            croutmac=-np.ones(1)
-                        else:
-                            croutmac=np.ones(0)
+                        croutmac=-np.ones(1)
+                    except TypeError:
+                        croutmac=np.ones(0)
                                 
                 crmac=crmac[croutmac>-1]
                 croutmac=croutmac[croutmac>-1]
