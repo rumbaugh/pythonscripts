@@ -310,33 +310,49 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
         if ((plotmacleod)|(load_macleod)):
             try:
                 crmac=np.loadtxt('%s/%s/Macleod_LC.tab'%(DBdir,DBID),dtype={'names':('DatabaseID','RA','DEC','MJD','BAND','MAG','MAGERR','FLAG'),'formats':('i8','f8','f8','f8','|S4','f8','f8','i8')})
-                crmac=crmac[(crmac['MAG']>0)&(crmac['MAG']<30)&(crmac['MAGERR']<5)]
+                if not(load_macleod):crmac=crmac[(crmac['MAG']>0)&(crmac['MAG']<30)&(crmac['MAGERR']<5)]
+                if load_outliers:
+                    try:
+                        crout=np.loadtxt('%s/%s/outliers.tab'%(DBdir,DBID),dtype='i8')
+                    except:
+                        crout=np.zeros(len(cr))
+                    if load_macleod:
+                        try:
+                            croutmac=np.loadtxt('%s/%s/outliers_Macleod.tab'%(DBdir,DBID),dtype='i8')
+                        except:
+                            try:
+                                croutmac=-np.ones(len(crmac))
+                                crmac=crmac[croutmac>-1]
+                                croutmac=croutmac[croutmac>-1]
+                                outlier_arr=np.array(np.append(crout,croutmac),dtype='bool')
+                            except IndexError:
+                                croutmac=-np.ones(1)
+                                crmac=crmac[croutmac>-1]
+                                croutmac=croutmac[croutmac>-1]
+                                outlier_arr=np.array(np.append(crout,croutmac),dtype='bool')
+                            except TypeError:
+                                croutmac=np.ones(0)
+                                outlier_arr=np.array(crout,dtype='bool')
+                            
+                    else:
+                        outlier_arr=np.array(crout,dtype='bool')
             except:
                 crmac=None
+                if load_outliers:
+                    try:
+                        crout=np.loadtxt('%s/%s/outliers.tab'%(DBdir,DBID),dtype='i8')
+                    except:
+                        crout=np.zeros(len(cr))
+                    outlier_arr=np.array(crout,dtype='bool')
         else:
             crmac=None
-        if load_outliers:
-            try:
-                crout=np.loadtxt('%s/%s/outliers.tab'%(DBdir,DBID),dtype='i8')
-            except:
-                crout=np.zeros(len(cr))
-            if load_macleod:
+            if load_outliers:
                 try:
-                    croutmac=np.loadtxt('%s/%s/outliers_Macleod.tab'%(DBdir,DBID),dtype='i8')
+                    crout=np.loadtxt('%s/%s/outliers.tab'%(DBdir,DBID),dtype='i8')
                 except:
-                    try:
-                        croutmac=-np.ones(len(crmac))
-                    except IndexError:
-                        croutmac=-np.ones(1)
-                    except TypeError:
-                        croutmac=np.ones(0)
-                                
-                crmac=crmac[croutmac>-1]
-                croutmac=croutmac[croutmac>-1]
-                outlier_arr=np.array(np.append(crout,croutmac),dtype='bool')
-            else:
+                    crout=np.zeros(len(cr))
                 outlier_arr=np.array(crout,dtype='bool')
-        elif calc_outliers: 
+        if ((calc_outliers)&(not(load_outliers))): 
             outlier_arr=np.zeros(len(cr),dtype='bool')
         if load_macleod:
             cr=np.append(cr,crmac)
