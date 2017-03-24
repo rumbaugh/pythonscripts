@@ -419,6 +419,7 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
             outlier_arr=None
         if ((np.shape(crmac)!=())&(not(load_macleod))):
             mjd,mag,magerr,bands=(mjd,crmac['MJD']),(mag,crmac['MAG']),(magerr,crmac['MAGERR']),(bands,crmac['BAND'])
+        print len(mjd),len(outlier_arr)
         plot_lightcurve(DBID,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage,specfile=specfile,DESfname=DESfname,WavLL=WavLL,WavUL=WavUL,outlierflag=outlierflags[idb],zoominband=zoominband,outlierarr=outlier_arr,connectpoints=connectpoints)
     psfpage.close()
 
