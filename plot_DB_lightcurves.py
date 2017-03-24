@@ -323,7 +323,7 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
                             croutmac=croutmac[croutmac>-1]
                             outlier_arr=np.array(np.append(crout,croutmac),dtype='bool')
                         except:
-                            croutmac,crmac=np.ones(0),cr[]
+                            croutmac,crmac=np.ones(0),cr[np.zeros(0,dtype='i8')]
                             outlier_arr=np.array(crout,dtype='bool')
                             
                     else:
