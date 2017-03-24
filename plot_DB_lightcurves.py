@@ -310,54 +310,40 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
         if ((plotmacleod)|(load_macleod)):
             try:
                 crmac=np.loadtxt('%s/%s/Macleod_LC.tab'%(DBdir,DBID),dtype={'names':('DatabaseID','RA','DEC','MJD','BAND','MAG','MAGERR','FLAG'),'formats':('|S24','f8','f8','f8','|S4','f8','f8','i8')})
-                print 'a'
                 if not(load_macleod):crmac=crmac[(crmac['MAG']>14)&(crmac['MAG']<30)&(crmac['MAGERR']<5)]
                 if load_outliers:
                     try:
                         crout=np.loadtxt('%s/%s/outliers.tab'%(DBdir,DBID),dtype='i8')
-                        print 'b'
                     except:
                         crout=np.zeros(len(cr))
-                        print 'c'
                     if load_macleod:
                         try:
                             croutmac=np.loadtxt('%s/%s/outliers_Macleod.tab'%(DBdir,DBID),dtype='i8')
-                            print 'd'
                             try:
                                 crmac=crmac[croutmac>-1]
                                 croutmac=croutmac[croutmac>-1]
-                                print 'e'
                             except:
                                 if croutmac==-1: croutmac,crmac=np.ones(0),cr[np.zeros(0,dtype='i8')]
-                                print 'f'
                             outlier_arr=np.array(np.append(crout,croutmac),dtype='bool')
                         except:
                             croutmac,crmac=np.ones(0),cr[np.zeros(0,dtype='i8')]
                             outlier_arr=np.array(crout,dtype='bool')
-                            print 'g'
-                            
                     else:
                         outlier_arr=np.array(crout,dtype='bool')
-                        print 'h'
             except:
                 crmac=None
-                print 'i'
                 if load_outliers:
                     try:
                         crout=np.loadtxt('%s/%s/outliers.tab'%(DBdir,DBID),dtype='i8')
-                        print 'j'
                         print len(cr),len(crout)
                     except:
                         crout=np.zeros(len(cr))
-                        print 'k'
                     outlier_arr=np.array(crout,dtype='bool')
         else:
             crmac=None
-            print 'l'
             if load_outliers:
                 try:
                     crout=np.loadtxt('%s/%s/outliers.tab'%(DBdir,DBID),dtype='i8')
-                    print 'm'
                 except:
                     crout=np.zeros(len(cr))
                 outlier_arr=np.array(crout,dtype='bool')
@@ -429,7 +415,6 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
             outlier_arr=None
         if ((np.shape(crmac)!=())&(not(load_macleod))):
             mjd,mag,magerr,bands=(mjd,crmac['MJD']),(mag,crmac['MAG']),(magerr,crmac['MAGERR']),(bands,crmac['BAND'])
-        print len(mjd),len(outlier_arr)
         plot_lightcurve(DBID,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage,specfile=specfile,DESfname=DESfname,WavLL=WavLL,WavUL=WavUL,outlierflag=outlierflags[idb],zoominband=zoominband,outlierarr=outlier_arr,connectpoints=connectpoints)
     psfpage.close()
 
