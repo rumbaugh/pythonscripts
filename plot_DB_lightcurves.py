@@ -355,8 +355,7 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
         if ((calc_outliers)&(not(load_outliers))): 
             outlier_arr=np.zeros(len(cr),dtype='bool')
         if load_macleod:
-            cr=np.append(cr,crmac)
-        print cr
+            if crmac!=None:cr=np.append(cr,crmac)
         gorig=np.arange(len(cr))[(cr['MAG']>0)&(cr['MAG']<30)&(cr['MAGERR']<5)]
         cr=cr[(cr['MAG']>0)&(cr['MAG']<30)&(cr['MAGERR']<5)]
         gdes=np.where(cr['Survey']=='DES')[0]
