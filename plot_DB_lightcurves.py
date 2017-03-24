@@ -372,6 +372,7 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
                 cr=np.append(newcr,newcrmac)
         gorig=np.arange(len(cr))[(cr['MAG']>14)&(cr['MAG']<30)&(cr['MAGERR']<5)]
         cr=cr[(cr['MAG']>14)&(cr['MAG']<30)&(cr['MAGERR']<5)]
+        if load_outliers: outlier_arr=outlier_arr[gorig]
         gdes=np.where(cr['Survey']=='DES')[0]
         if ((len(gdes)>1)&(convertDESmags)):
             gg,gr=np.where(cr['BAND'][gdes]=='g')[0],np.where(cr['BAND'][gdes]=='r')[0]
