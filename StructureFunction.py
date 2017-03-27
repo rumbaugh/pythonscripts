@@ -51,7 +51,7 @@ def CalcStructureFunction_IQR(S,ltime,nbins=10):
     tau_arr[0] = np.average(SF_arr[:binsize0][:,0])
     Varr_tmp,tauarr_tmp=np.sort(np.reshape(SF_arr[binsize0:][:,1],((nbins-1,binsize))),axis=1),np.reshape(SF_arr[binsize0:][:,0],((nbins-1,binsize)))
     V_arr[1:],tau_arr[1:]=Varr_tmp[:,(3*np.shape(Varr_tmp)[-1])/4]-Varr_tmp[:,np.shape(Varr_tmp)[-1]/4],np.average(tauarr_tmp,axis=1)
-    return tau_arr,0.549*(V_arr**2-V0**2)
+    return tau_arr,np.sqrt(0.549*(V_arr**2-V0**2))
 
 
 def CalcStructureFunction_eq14(S,ltime,nbins=10):
