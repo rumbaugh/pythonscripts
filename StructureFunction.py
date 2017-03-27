@@ -10,7 +10,7 @@ def ConstructStructureFunctionArray(S,ltime,Serr=None,fullerror=True):
         Verr = np.zeros(0)
         if len(S) != len(Serr): sys.exit("S and Serr don't have same dimensions.")
     S1,S2=np.repeat(S,len(S)),np.tile(S,len(S))
-    t1,t2=np.repeat(ltime,len(ltime)**2),np.tile(ltime,len(ltime)**2)
+    t1,t2=np.repeat(ltime,len(ltime)),np.tile(ltime,len(ltime))
     g12=np.where(t1>t2)[0]
     S1,S2,t1,t2=S1[g12],S2[g12],t1[g12],t2[g12]
     Varr,tauarr=(S1-S2)**2,t1-t2
@@ -33,7 +33,7 @@ def CalcStructureFunction_IQR(S,ltime,nbins=10):
     if len(S) != len(ltime): sys.exit("S and ltime don't have same dimensions.")
     S1,S2=np.repeat(S,len(S)),np.tile(S,len(S))
     print 'len(S1,S2)=',len(S1),len(S2)
-    t1,t2=np.repeat(ltime,len(ltime)**2),np.tile(ltime,len(ltime)**2)
+    t1,t2=np.repeat(ltime,len(ltime)),np.tile(ltime,len(ltime))
     print 'len(t1,t2)=',len(t1),len(t2)
     g12=np.where(t1>t2)[0]
     print 'len(g12)=',len(g12)
