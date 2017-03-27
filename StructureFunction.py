@@ -41,12 +41,14 @@ def CalcStructureFunction_IQR(S,ltime,nbins=10):
     SF_arr[:,0],SF_arr[:,1] = tauarr[as_tauarr],Varr[as_tauarr]
     V0,V0days=np.nan,2
     while np.isnan(V0):
+        print 'V0dats=',V0days
         SF0=np.sort(SF_arr[:,1][SF_arr[:,0]<V0days])
         V0=SF0[(3*len(SF0))/4]-SF0[len(SF0)/4]
         V0days*=2
     npairs = np.shape(SF_arr)[0]
     binsize = npairs/nbins
     binsize0 = binsize + np.mod(npairs,nbins)
+    print binsize0
     V_arr = np.zeros(nbins)
     tau_arr = np.zeros(nbins)
     V_temp=np.sort(SF_arr[:binsize0][:,1])
