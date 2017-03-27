@@ -32,30 +32,23 @@ def CalcStructureFunction_IQR(S,ltime,nbins=10):
     Varr,tauarr = np.zeros(0),np.zeros(0)
     if len(S) != len(ltime): sys.exit("S and ltime don't have same dimensions.")
     S1,S2=np.repeat(S,len(S)),np.tile(S,len(S))
-    print 'len(S1,S2)=',len(S1),len(S2)
     t1,t2=np.repeat(ltime,len(ltime)),np.tile(ltime,len(ltime))
-    print 'len(t1,t2)=',len(t1),len(t2)
     g12=np.where(t1>t2)[0]
-    print 'len(g12)=',len(g12)
     S1,S2,t1,t2=S1[g12],S2[g12],t1[g12],t2[g12]
-    print 'len(S1,S2)=',len(S1),len(S2)
-    print 'len(t1,t2)=',len(t1),len(t2)
     Varr,tauarr=S1-S2,t1-t2
-    print 'len(Varr,tauarr)=',len(Varr),len(tauarr)
     as_tauarr = np.argsort(tauarr)
     SF_arr = np.zeros((len(tauarr),2))
     SF_arr[:,0],SF_arr[:,1] = tauarr[as_tauarr],Varr[as_tauarr]
     V0,V0days=np.nan,2
     while np.isnan(V0):
-        print 'V0dats=',V0days
         SF0=np.sort(SF_arr[:,1][SF_arr[:,0]<V0days])
+        print SF0
         V0=SF0[(3*len(SF0))/4]-SF0[len(SF0)/4]
+        print V0
         V0days*=2
-    print np.shape(SF_arr)
     npairs = np.shape(SF_arr)[0]
     binsize = npairs/nbins
     binsize0 = binsize + np.mod(npairs,nbins)
-    print binsize0
     V_arr = np.zeros(nbins)
     tau_arr = np.zeros(nbins)
     V_temp=np.sort(SF_arr[:binsize0][:,1])
@@ -63,7 +56,6 @@ def CalcStructureFunction_IQR(S,ltime,nbins=10):
     tau_arr[0] = np.average(SF_arr[:binsize0][:,0])
     Varr_tmp,tauarr_tmp=np.sort(np.reshape(SF_arr[binsize0:][:,1],((nbins-1,binsize))),axis=1),np.reshape(SF_arr[binsize0:][:,0],((nbins-1,binsize)))
     V_arr[1:],tau_arr[1:]=Varr_tmp[:,(3*np.shape(Varr_tmp)[-1])/4]-Varr_tmp[:,np.shape(Varr_tmp)[-1]/4],np.average(tauarr_tmp,axis=1)
-    print np.shape(V_arr),np.shape(tau_arr)
     return tau_arr,np.sqrt(0.549*(V_arr**2-V0**2))
 
 
