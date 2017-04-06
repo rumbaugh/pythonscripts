@@ -90,11 +90,16 @@ def EnsembleStructureFunction_IQR(Sarr,ltimearr,zarr=None,nbins=10,binwidth=None
         Varr_tmp,tauarr_tmp=np.sort(np.reshape(SF_arr[binsize0:][:,1],((nbins-1,binsize))),axis=1),np.reshape(SF_arr[binsize0:][:,0],((nbins-1,binsize)))
         V_arr[1:],tau_arr[1:]=Varr_tmp[:,(3*np.shape(Varr_tmp)[-1])/4]-Varr_tmp[:,np.shape(Varr_tmp)[-1]/4],np.average(tauarr_tmp,axis=1)
     else:
-        nbins=np.int(np.ceil((np.max(np.log10(SF_arr[:,0]))-np.min(np.log10(SF_arr[:,0])))/binwidth))
-        logtau_arr=np.arange(np.min(np.log10(SF_arr[:,0])),np.max(np.log10(SF_arr[:,0])),binwidth)
+        mintime=np.min(np.log10(SF_arr[:,0]))
+        if mintime<V0days:mintime=V0days
+        nbins=np.int(np.ceil((np.max(np.log10(SF_arr[:,0]))-mintime)/binwidth))
+        logtau_arr=np.arange(mintime,np.max(np.log10(SF_arr[:,0])),binwidth)
         V_arr=np.zeros(nbins)
         for i in range(0,nbins):
-            gv=np.where((np.log10(SF_arr[:,0])>=logtau_arr[i])&(np.log10(SF_arr[:,0])<logtau_arr[i]+binwidth))[0]
+            if i==0:
+                gv=np.where((np.log10(SF_arr[:,0])<logtau_arr[i]+binwidth))[0]
+            else:
+                gv=np.where((np.log10(SF_arr[:,0])>=logtau_arr[i])&(np.log10(SF_arr[:,0])<logtau_arr[i]+binwidth))[0]
             if len(gv)>0:
                 Varr_tmp=np.sort(SF_arr[:,1][gv])
                 V_arr[i]=Varr_tmp[(3*np.shape(Varr_tmp)[-1])/4]-Varr_tmp[np.shape(Varr_tmp)[-1]/4]
