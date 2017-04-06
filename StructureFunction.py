@@ -91,7 +91,7 @@ def EnsembleStructureFunction_IQR(Sarr,ltimearr,zarr=None,nbins=10,binwidth=None
         V_arr[1:],tau_arr[1:]=Varr_tmp[:,(3*np.shape(Varr_tmp)[-1])/4]-Varr_tmp[:,np.shape(Varr_tmp)[-1]/4],np.average(tauarr_tmp,axis=1)
     else:
         mintime=np.min(np.log10(SF_arr[:,0]))
-        if mintime<V0days:mintime=V0days
+        if mintime<np.log10(V0days):mintime=np.log10(V0days)
         nbins=np.int(np.ceil((np.max(np.log10(SF_arr[:,0]))-mintime)/binwidth))
         logtau_arr=np.arange(mintime,np.max(np.log10(SF_arr[:,0])),binwidth)
         V_arr=np.zeros(nbins)
