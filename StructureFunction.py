@@ -71,7 +71,7 @@ def EnsembleStructureFunction_IQR(Sarr,ltimearr,zarr=None,nbins=10,binwidth=None
         t1,t2=np.repeat(ltime,len(ltime)),np.tile(ltime,len(ltime))
         g12=np.where(t1>t2)[0]
         S1,S2,t1,t2=S1[g12],S2[g12],t1[g12],t2[g12]
-        Varr,tauarr=S1-S2,t1-t2
+        Varr,tauarr=np.abs(S1-S2),t1-t2
         as_tauarr = np.argsort(tauarr)
         SF_arrtmp = np.zeros((len(tauarr),2))
         SF_arrtmp[:,0],SF_arrtmp[:,1] = tauarr[as_tauarr],Varr[as_tauarr]
