@@ -59,6 +59,64 @@ def CalcStructureFunction_IQR(S,ltime,nbins=10):
     return tau_arr,np.sqrt(0.549*(V_arr**2-V0**2))
 
 
+def EnsembleStructureFunction_IQR(Sarr,ltimearr,zarr=None,nbins=10,binwidth=None,V0days=2,calcerror=False,ntrials=10000):
+    if len(Sarr) != len(ltimearr): sys.exit("Sarr and ltimearr don't have same dimensions.")
+    SF_arr=np.zeros((0,2))
+    for i in range(0,len(Sarr)):
+        S,ltime=Sarr[i],ltimearr[i]
+        if len(S) != len(ltime): sys.exit("index %i: S and ltime don't have same dimensions."%i)
+        ltime=(ltime-ltime[0])
+        if np.shape(zarr)!=():ltime/=(1.+zarr[i])
+        S1,S2=np.repeat(S,len(S)),np.tile(S,len(S))
+        t1,t2=np.repeat(ltime,len(ltime)),np.tile(ltime,len(ltime))
+        g12=np.where(t1>t2)[0]
+        S1,S2,t1,t2=S1[g12],S2[g12],t1[g12],t2[g12]
+        Varr,tauarr=S1-S2,t1-t2
+        as_tauarr = np.argsort(tauarr)
+        SF_arrtmp = np.zeros((len(tauarr),2))
+        SF_arrtmp[:,0],SF_arrtmp[:,1] = tauarr[as_tauarr],Varr[as_tauarr]
+        SF_arr=np.append(SF_arr,SF_arrtmp,axis=0)
+    SF0=np.sort(SF_arr[:,1][SF_arr[:,0]<V0days])
+    V0=SF0[(3*len(SF0))/4]-SF0[len(SF0)/4]
+    npairs = np.shape(SF_arr)[0]
+    if binwidth==None:
+        binsize = npairs/nbins
+        binsize0 = binsize + np.mod(npairs,nbins)
+        V_arr = np.zeros(nbins)
+        tau_arr = np.zeros(nbins)
+        V_temp=np.sort(SF_arr[:binsize0][:,1])
+        V_arr[0] = V_temp[(3*len(V_temp))/4]-V_temp[len(V_temp)/4]
+        tau_arr[0] = np.average(SF_arr[:binsize0][:,0])
+        Varr_tmp,tauarr_tmp=np.sort(np.reshape(SF_arr[binsize0:][:,1],((nbins-1,binsize))),axis=1),np.reshape(SF_arr[binsize0:][:,0],((nbins-1,binsize)))
+        V_arr[1:],tau_arr[1:]=Varr_tmp[:,(3*np.shape(Varr_tmp)[-1])/4]-Varr_tmp[:,np.shape(Varr_tmp)[-1]/4],np.average(tauarr_tmp,axis=1)
+    else:
+        nbins=np.int(np.ceil((np.max(np.log10(SF_arr[:,0]))-np.min(np.log10(SF_arr[:,0])))/binwidth))
+        logtau_arr=np.arange(np.min(np.log10(SF_arr[:,0])),np.max(np.log10(SF_arr[:,0])),binwidth)
+        V_arr=np.zeros(nbins)
+        for i in range(0,nbins):
+            gv=np.where((np.log10(SF_arr[:,0])>=logtau_arr[i])&(np.log10(SF_arr[:,0])<logtau_arr[i]+binwidth))[0]
+            if len(gv)>0:
+                Varr_tmp=np.sort(SF_arr[:,1][gv])
+                V_arr[i]=Varr_tmp[(3*np.shape(Varr_tmp)[-1])/4]-Varr_tmp[np.shape(Varr_tmp)[-1]/4]
+        if calcerror:
+            SFrand=np.random.choice(SF_arr[:,1],len(SF_arr[:,1])*ntrials).reshape((ntrials,len(SF_arr[:,1])))
+            Vrand=np.zeros((ntrials,nbins))
+            for n in range(0,ntrials):
+                for i in range(0,nbins):
+                    gv=np.where((np.log10(SF_arr[:,0])>=logtau_arr[i])&(np.log10(SF_arr[:,0])<logtau_arr[i]+binwidth))[0]
+                    if len(gv)>0:
+                        Varr_tmp=np.sort(SFrand[n][gv])
+                        Vrand[n][i]=Varr_tmp[(3*np.shape(Varr_tmp)[-1])/4]-Varr_tmp[np.shape(Varr_tmp)[-1]/4]
+            Vrand=np.sort(np.sqrt(0.549*(Vrand**2-V0**2)),axis=0)
+            Verr=0.5*(Vrand[int((0.5+0.682689*0.5)*ntrials)]-Vrand[int((0.5-0.682689*0.5)*ntrials)])
+        logtau_arr=logtau_arr[:nbins]+0.5*binwidth
+        tau_arr=10**logtau_arr
+    if calcerror:
+        return tau_arr,np.sqrt(0.549*(V_arr**2-V0**2)),Verr
+    else:
+        return tau_arr,np.sqrt(0.549*(V_arr**2-V0**2))
+
+
 def CalcStructureFunction_eq14(S,ltime,nbins=10):
     SF_arr=ConstructStructureFunctionArray(S,ltime)
     npairs = np.shape(SF_arr)[0]
