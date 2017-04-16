@@ -116,7 +116,10 @@ def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage=
     bestdiff={b: {'diff': 0, 'ihi': 0, 'ilo': 0} for b in ['g','r','i','z']}
     #for b in ['g','r','i','z']:
     for b in ['g']:
-        gb=np.where((bands==b)&(survey!='POSS'))[0]
+        if np.shape(outlierarr)!=():
+            gb=np.where((outlierarr==0)&(bands==b)&(survey!='POSS'))[0]
+        else:
+            gb=np.where((bands==b)&(survey!='POSS'))[0]
         #if ((len(gsdss)>0)&(len(gdes)>0)):
         #    gsdssb,gdesb=np.where(bands[gsdss]==b)[0],np.where(bands[gdes]==b)[0]
         #    if ((len(gsdssb)>0)&(len(gdesb)>0)):
