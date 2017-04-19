@@ -227,7 +227,7 @@ def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage=
         ylim=(np.min(mag)-0.1,ylim[1])
     if ylim[0]<15: ylim=(15,ylim[1])
     plt.ylim(ylim[1],ylim[0])
-    ax1.legend()
+    ax1.legend(frameon=False,prop={'size':12},scatterpoints=1)
     xlim=plt.xlim()
     if outlierflag==1:
         ax1.text(0.5*(xlim[0]+xlim[1]),15./16*ylim[0]+ylim[1]/16.,'OUTLIER',color='r',horizontalalignment='center')
