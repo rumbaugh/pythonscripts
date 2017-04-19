@@ -243,6 +243,10 @@ def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage=
         ax4=plt.subplot2grid((2,10),(1,6),colspan=4,xticks=[],yticks=[])
         img4=mpimg.imread('%s/imagestamps/%s'%(DBdir,DESfname))
         ax4.imshow(img4)
+        ax4.plot(np.array([0.5,0.5]),np.array([0.55,0.8]),color='white',transform=ax.transAxes)
+        ax4.plot(np.array([0.5,0.5]),np.array([0.45,0.2]),color='white',transform=ax.transAxes)
+        ax4.plot(np.array([0.45,0.2]),np.array([0.5,0.5]),color='white',transform=ax.transAxes)
+        ax4.plot(np.array([0.55,0.8]),np.array([0.5,0.5]),color='white',transform=ax.transAxes)
     if len(gsdss)>0:
         SDSSfname='%s/imagestamps/%s_SDSScutout.jpeg'%(DBdir,dbid)
         try:
