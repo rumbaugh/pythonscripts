@@ -205,6 +205,10 @@ def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage=
             ylim=(np.min(mag)-0.1,ylim[1])
         if ylim[0]<15: ylim=(15,ylim[1])
         plt.ylim(ylim[1],ylim[0])
+        xlim=plt.xlim()
+        mjdcheck=mjd
+        if plotmacleod: mjdcheck=np.append(mjdcheck,mjdmc)
+        plt.xlim(np.min(mjdcheck)-0.05*(np.max(mjdcheck)-np.min(mjdcheck)),xlim[1])
         ax3.set_xlabel('MJD')
         ax3.set_ylabel('%s_PSF'%zoominband)
     ax1=plt.subplot2grid((2,10),(0,0),colspan=6)
@@ -216,7 +220,7 @@ def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage=
     for b in ['g','r','i','z','Y']:
         plot_band(ax1,mjd,mag,magerr,bands,b,connectpoints=connectpoints,nolabels=False)
     xlim=plt.xlim()
-    plt.xlim(xlim[0],xlim[1]+0.33*(xlim[1]-xlim[0]))
+    plt.xlim(xlim[0],xlim[1]+0.2*(xlim[1]-xlim[0]))
     ylim=plt.ylim()
     plt.axvline(mjd[imax],ls='dashed',lw=1,color='r')
     plt.axvline(mjd[imin],ls='dashed',lw=1,color='b')
@@ -247,7 +251,7 @@ def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage=
         ax4.plot(np.array([0.5,0.5]),np.array([0.45,0.2]),color='yellow',transform=ax4.transAxes)
         ax4.plot(np.array([0.45,0.2]),np.array([0.5,0.5]),color='yellow',transform=ax4.transAxes)
         ax4.plot(np.array([0.55,0.8]),np.array([0.5,0.5]),color='yellow',transform=ax4.transAxes)
-        ax4.text(0.5,1.1,DESfname[3:],color='k',horizontalalignment='center')
+        ax4.text(0.5,1.1,DESfname[3:],color='k',horizontalalignment='center',transform=ax4.transAxes)
     if len(gsdss)>0:
         SDSSfname='%s/imagestamps/%s_SDSScutout.jpeg'%(DBdir,dbid)
         try:
