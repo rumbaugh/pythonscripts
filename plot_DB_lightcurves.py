@@ -82,7 +82,7 @@ def plot_band(ax,mjd,mag,magerr,cbands,band,connectpoints=True,nolabels=False,ou
     #return
 
 
-def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage=None,fname=None,DESfname=None,connectpoints=True,specfile=None,WavLL=3000,WavUL=10500,outlierflag=0,zoominband=None,outlierarr=None):
+def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage=None,fname=None,DESfname=None,connectpoints=True,specfile=None,WavLL=3000,WavUL=10500,outlierflag=0,zoominband=None,outlierarr=None,sdsscutoutradec=None):
     try:
         test1=mjd.index
         plotmacleod=True
@@ -251,13 +251,14 @@ def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage=
         ax4.plot(np.array([0.5,0.5]),np.array([0.45,0.2]),color='yellow',transform=ax4.transAxes)
         ax4.plot(np.array([0.45,0.2]),np.array([0.5,0.5]),color='yellow',transform=ax4.transAxes)
         ax4.plot(np.array([0.55,0.8]),np.array([0.5,0.5]),color='yellow',transform=ax4.transAxes)
-        ax4.text(0.5,1.1,DESfname[3:],color='k',horizontalalignment='center',transform=ax4.transAxes)
+        ax4.text(0.5,0.9,DESfname[3:-4],color='white',horizontalalignment='center',transform=ax4.transAxes)
     if len(gsdss)>0:
         SDSSfname='%s/imagestamps/%s_SDSScutout.jpeg'%(DBdir,dbid)
         try:
             img3=mpimg.imread(SDSSfname)
             ax3=plt.subplot2grid((2,10),(0,6),colspan=4,xticks=[],yticks=[])
             ax3.imshow(img3)
+            if sdsscutoutradec!=None:ax3.text(0.5,0.9,sdsscutoutradec,color='k',horizontalalignment='center',transform=ax3.transAxes)
         except:
             pass
     if psfpage!=None:plt.savefig(psfpage,format='pdf')
@@ -269,13 +270,13 @@ def DES2SDSS_gr(g,r):
 def DES2SDSS_iz(i,z):
     return (-89*np.sqrt(-96000*i+96000*z+181561)+8000*z+37827)/8000.,(-17*np.sqrt(-96000*i+96000*z+181561)+24000*z+6731)/24000.
 
-def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A1',WavLL=3000,WavUL=10500,convertDESmags=False,outlierflags=None,zoominband=None,calc_outliers=False,outlier_window=300,outlier_thresh=0.5,plotmacleod=False,connectpoints=True,load_macleod=False,load_outliers=False):
+def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A1',WavLL=3000,WavUL=10500,convertDESmags=False,outlierflags=None,zoominband=None,calc_outliers=False,outlier_window=300,outlier_thresh=0.5,plotmacleod=False,connectpoints=True,load_macleod=False,load_outliers=False,sdsscutoutradec=None):
     if np.shape(outlierflags)==(): outlierflags=np.zeros(len(DBIDs))
     hdu=py.open('%s/masterfile.fits'%DBdir)
     data=hdu[1].data
     psfpage=bpdf.PdfPages(outputfile)
     crdescutout=np.loadtxt('%s/imagestamps/DESimagestamp_index.dat'%DBdir,dtype={'names':('DBID','ra','dec','tile','fname'),'formats':('|S32','f8','f8','|S12','|S25')})
-
+        
     crdb=np.loadtxt('%s/database_index.dat'%DBdir,dtype={'names':('DBID','CID','thingid','sdr7id','MQrownum','SPrownum','SDSSNAME'),'formats':('|S64','i8','i8','|S24','i8','i8','|S64')})
     crpmf1=np.loadtxt('%s/MQ_SDSS_y3a1_tidplatemjdfiber.csv'%DBdir,delimiter=',',skiprows=1,dtype={'names':('tid','plate','mjd','fiber'),'formats':('i8','i8','i8','i8')})
     crpmf2=np.loadtxt('%s/DR7_BH_SDSS_tidplatemjdfiber.csv'%DBdir,delimiter=',',skiprows=1,dtype={'names':('tid','plate','mjd','fiber'),'formats':('i8','i8','i8','i8')})
@@ -426,7 +427,9 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
             outlier_arr=None
         if ((np.shape(crmac)!=())&(not(load_macleod))):
             mjd,mag,magerr,bands=(mjd,crmac['MJD']),(mag,crmac['MAG']),(magerr,crmac['MAGERR']),(bands,crmac['BAND'])
-        plot_lightcurve(DBID,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage,specfile=specfile,DESfname=DESfname,WavLL=WavLL,WavUL=WavUL,outlierflag=outlierflags[idb],zoominband=zoominband,outlierarr=outlier_arr,connectpoints=connectpoints)
+        cursdsscutoutradec=None
+        if sdsscutoutradec!=None: cursdsscutoutradec=sdsscutoutradec[idb]
+        plot_lightcurve(DBID,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage,specfile=specfile,DESfname=DESfname,WavLL=WavLL,WavUL=WavUL,outlierflag=outlierflags[idb],zoominband=zoominband,outlierarr=outlier_arr,connectpoints=connectpoints,sdsscutoutradec=cursdsscutoutradec)
     psfpage.close()
 
 def plot_DBID(DBID,DBdir='/data2/rumbaugh/var_database/Y3A1',WavLL=3000,WavUL=10500,convertDESmags=False):
