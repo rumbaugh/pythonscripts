@@ -208,7 +208,7 @@ def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage=
         xlim=plt.xlim()
         mjdcheck=mjd
         if plotmacleod: mjdcheck=np.append(mjdcheck,mjdmc)
-        plt.xlim(np.min(mjdcheck)-0.05*(np.max(mjdcheck)-np.min(mjdcheck)),xlim[1])
+        plt.xlim(np.min(mjdcheck)-0.05*(np.max(mjdcheck)-np.min(mjdcheck)),np.max(mjdcheck)+0.05*(np.max(mjdcheck)-np.min(mjdcheck)))
         ax3.set_xlabel('MJD')
         ax3.set_ylabel('%s_PSF'%zoominband)
     ax1=plt.subplot2grid((2,10),(0,0),colspan=6)
@@ -217,8 +217,11 @@ def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage=
     plt.tick_params(which='major',length=8,width=2,labelsize=14)
     plt.tick_params(which='minor',length=4,width=1.5,labelsize=14)
     plt.locator_params(nbins=4)
+    mjdcheck=np.zeros(0)
     for b in ['g','r','i','z','Y']:
         plot_band(ax1,mjd,mag,magerr,bands,b,connectpoints=connectpoints,nolabels=False)
+        mjdcheck=np.append(mjdcheck,mjd)
+    plt.xlim(np.min(mjdcheck)-0.05*(np.max(mjdcheck)-np.min(mjdcheck)),np.max(mjdcheck)+0.05*(np.max(mjdcheck)-np.min(mjdcheck)))
     xlim=plt.xlim()
     plt.xlim(xlim[0],xlim[1]+0.2*(xlim[1]-xlim[0]))
     ylim=plt.ylim()
