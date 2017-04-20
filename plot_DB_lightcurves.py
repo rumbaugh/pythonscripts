@@ -247,6 +247,7 @@ def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage=
         ax4.plot(np.array([0.5,0.5]),np.array([0.45,0.2]),color='yellow',transform=ax4.transAxes)
         ax4.plot(np.array([0.45,0.2]),np.array([0.5,0.5]),color='yellow',transform=ax4.transAxes)
         ax4.plot(np.array([0.55,0.8]),np.array([0.5,0.5]),color='yellow',transform=ax4.transAxes)
+        ax4.text(0.5,1.1,DESfname[3:],color='k',horizontalalignment='center')
     if len(gsdss)>0:
         SDSSfname='%s/imagestamps/%s_SDSScutout.jpeg'%(DBdir,dbid)
         try:
