@@ -240,7 +240,7 @@ def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage=
         ax1.text(0.5*(xlim[0]+xlim[1]),15./16*ylim[0]+ylim[1]/16.,'OUTLIER',color='r',horizontalalignment='center')
     elif outlierflag==2:
         ax1.text(0.5*(xlim[0]+xlim[1]),15./16*ylim[0]+ylim[1]/16.,'BAD PHOTOMETRY',color='r',horizontalalignment='center')
-    ax1.set_xlabel('MJD')
+    if zoominband==None:ax1.set_xlabel('MJD')
     ax1.set_ylabel('Mag_PSF')
     if redshift>0:
         ax1.set_title('%s, z=%.4f'%(dbid,trueredshift))
