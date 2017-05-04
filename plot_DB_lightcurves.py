@@ -51,7 +51,7 @@ def calc_flux(mjd,mag,magerr,cbands,band,mjdcen):
         mederr=mederr[0]
     return 10**(medmag/-2.5),np.abs(np.log(10)/-2.5*10**(medmag/-2.5)*mederr)
 
-def plot_band(ax,mjd,mag,magerr,cbands,band,connectpoints=True,nolabels=False,outlierarr=None,overridecolor=None):
+def plot_band(ax,mjd,mag,magerr,cbands,band,connectpoints=True,nolabels=False,outlierarr=None,overridecolor=None,psfmetric=None):
     gband=np.where(cbands==band)[0]
     magplot=mag[gband]
     magploterr=magerr[gband]
@@ -71,6 +71,13 @@ def plot_band(ax,mjd,mag,magerr,cbands,band,connectpoints=True,nolabels=False,ou
         ax.scatter(mjd[gband][g100],magplot[g100],color=curcol,zorder=20,edgecolor='k')
     else:
         ax.scatter(mjd[gband][g100],magplot[g100],color=curcol,label=band,zorder=20,edgecolor='k')
+    if psfmetric!=None:
+        try:
+            gpsf=np.where(psfmetric[gband][g100]>1)[0]
+            if len(gpsf)>0:
+                ax.scatter(mjd[gband][g100][gpsf],magplot[g100][psfmetric],color='pink',marker='d',lw=1,facecolor='None',edgecolor='pink')
+        except ValueError:
+            print 'Problem plotting psfmetric:\nlen(psfmetric)=%i, len(mjd)=%i'%(len(psfmetric),len(mjd))
     try:
         for outlier_set in outlierarr.keys():
             gout=np.intersect1d(np.arange(len(mag))[outlierarr[outlier_set]['g']],gband[g100])
@@ -82,7 +89,7 @@ def plot_band(ax,mjd,mag,magerr,cbands,band,connectpoints=True,nolabels=False,ou
     #return
 
 
-def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage=None,fname=None,DESfname=None,connectpoints=True,specfile=None,WavLL=3000,WavUL=10500,outlierflag=0,zoominband=None,outlierarr=None,sdsscutoutradec=None):
+def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage=None,fname=None,DESfname=None,connectpoints=True,specfile=None,WavLL=3000,WavUL=10500,outlierflag=0,zoominband=None,outlierarr=None,sdsscutoutradec=None,psfmetric=None):
     try:
         test1=mjd.index
         plotmacleod=True
@@ -192,7 +199,7 @@ def plot_lightcurve(dbid,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage=
         if trueredshift<=0: 
             plt.ylim(-0.05,1.15*maxplot)
     else:
-        plot_band(ax3,mjd,mag,magerr,bands,zoominband,connectpoints=connectpoints,nolabels=False,outlierarr=outlierarr)
+        plot_band(ax3,mjd,mag,magerr,bands,zoominband,connectpoints=connectpoints,nolabels=False,outlierarr=outlierarr,psfmetric=psfmetric)
         if plotmacleod:
             plot_band(ax3,mjdmc,magmc,magerrmc,bandsmc,zoominband,connectpoints=connectpoints,nolabels=False,overridecolor='magenta')
         plt.axvline(mjd[imax],ls='dashed',lw=1,color='r')
@@ -273,7 +280,7 @@ def DES2SDSS_gr(g,r):
 def DES2SDSS_iz(i,z):
     return (-89*np.sqrt(-96000*i+96000*z+181561)+8000*z+37827)/8000.,(-17*np.sqrt(-96000*i+96000*z+181561)+24000*z+6731)/24000.
 
-def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A1',WavLL=3000,WavUL=10500,convertDESmags=False,outlierflags=None,zoominband=None,calc_outliers=False,outlier_window=300,outlier_thresh=0.5,plotmacleod=False,connectpoints=True,load_macleod=False,load_outliers=False,sdsscutoutradec=None):
+def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A1',WavLL=3000,WavUL=10500,convertDESmags=False,outlierflags=None,zoominband=None,calc_outliers=False,outlier_window=300,outlier_thresh=0.5,plotmacleod=False,connectpoints=True,load_macleod=False,load_outliers=False,sdsscutoutradec=None,plotspread=False):
     if np.shape(outlierflags)==(): outlierflags=np.zeros(len(DBIDs))
     hdu=py.open('%s/masterfile.fits'%DBdir)
     data=hdu[1].data
@@ -322,7 +329,7 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
             specfile='%s/spec/spec-%04i-%05i-%04i.fits'%(DBdir,plate,pmf_mjd,fiber)
         else:
             specfile=None
-        cr=np.loadtxt('%s/%s/LC.tab'%(DBdir,DBID),dtype={'names':('DatabaseID','Survey','SurveyCoaddID','SurveyObjectID','RA','DEC','MJD','TAG','BAND','MAGTYPE','MAG','MAGERR','FLAG'),'formats':('|S64','|S20','|S20','|S20','f8','f8','f8','|S20','|S12','|S12','f8','f8','i8')},skiprows=1)
+        cr=np.loadtxt('%s/%s/LC.tab'%(DBdir,DBID),dtype={'names':('DatabaseID','Survey','SurveyCoaddID','SurveyObjectID','RA','DEC','MJD','TAG','BAND','MAGTYPE','MAG','MAGERR','FLAG','SPREAD','SPREADERR'),'formats':('|S64','|S20','|S20','|S20','f8','f8','f8','|S20','|S12','|S12','f8','f8','i8','f8','f8')},skiprows=1)
         if ((plotmacleod)|(load_macleod)):
             try:
                 crmac=np.loadtxt('%s/%s/Macleod_LC.tab'%(DBdir,DBID),dtype={'names':('DatabaseID','RA','DEC','MJD','BAND','MAG','MAGERR','FLAG'),'formats':('|S24','f8','f8','f8','|S4','f8','f8','i8')})
@@ -402,7 +409,7 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
                 newi,dum1=DES2SDSS_iz(cr['MAG'][gdes][gi],medz)
                 dum2,newz=DES2SDSS_iz(medi,cr['MAG'][gdes][gz])
                 cr['MAG'][gdes[gi]],cr['MAG'][gdes[gz]]=newi,newz
-        mjd,mag,magerr,bands,survey=cr['MJD'],cr['MAG'],cr['MAGERR'],cr['BAND'],cr['Survey']
+        mjd,mag,magerr,bands,survey,spread,spreaderr=cr['MJD'],cr['MAG'],cr['MAGERR'],cr['BAND'],cr['Survey'],cr['SPREAD'],cr['SPREADERR']
         if ((calc_outliers)&(not(load_macleod))):
             gb=np.where(bands=='g')[0]
             if np.shape(outlier_window)!=():
@@ -429,10 +436,14 @@ def plot_DB_lightcurves(DBIDs,outputfile,DBdir='/data2/rumbaugh/var_database/Y3A
         elif not(load_macleod):
             outlier_arr=None
         if ((np.shape(crmac)!=())&(not(load_macleod))):
-            mjd,mag,magerr,bands=(mjd,crmac['MJD']),(mag,crmac['MAG']),(magerr,crmac['MAGERR']),(bands,crmac['BAND'])
+            mjd,mag,magerr,bands,spread,spreaderr=(mjd,crmac['MJD']),(mag,crmac['MAG']),(magerr,crmac['MAGERR']),(bands,crmac['BAND']),(spread,0),(spreaderr,0)
+        if plotspread:
+            psfmetric=spread/np.sqrt(0.003**2+4*spreaderr**2)
+        else:
+            psfmetric=None
         cursdsscutoutradec=None
         if sdsscutoutradec!=None: cursdsscutoutradec=sdsscutoutradec[idb]
-        plot_lightcurve(DBID,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage,specfile=specfile,DESfname=DESfname,WavLL=WavLL,WavUL=WavUL,outlierflag=outlierflags[idb],zoominband=zoominband,outlierarr=outlier_arr,connectpoints=connectpoints,sdsscutoutradec=cursdsscutoutradec)
+        plot_lightcurve(DBID,mjd,mag,magerr,bands,survey,trueredshift,DBdir,psfpage,specfile=specfile,DESfname=DESfname,WavLL=WavLL,WavUL=WavUL,outlierflag=outlierflags[idb],zoominband=zoominband,outlierarr=outlier_arr,connectpoints=connectpoints,sdsscutoutradec=cursdsscutoutradec,psfmetric=psfmetric)
     psfpage.close()
 
 def plot_DBID(DBID,DBdir='/data2/rumbaugh/var_database/Y3A1',WavLL=3000,WavUL=10500,convertDESmags=False):
@@ -472,7 +483,7 @@ def plot_DBID(DBID,DBdir='/data2/rumbaugh/var_database/Y3A1',WavLL=3000,WavUL=10
         specfile='%s/spec/spec-%04i-%05i-%04i.fits'%(DBdir,plate,pmf_mjd,fiber)
     else:
         specfile=None
-    cr=np.loadtxt('%s/%s/LC.tab'%(DBdir,DBID),dtype={'names':('DatabaseID','Survey','SurveyCoaddID','SurveyObjectID','RA','DEC','MJD','TAG','BAND','MAGTYPE','MAG','MAGERR','FLAG'),'formats':('|S64','|S20','|S20','|S20','f8','f8','f8','|S20','|S12','|S12','f8','f8','i8')},skiprows=1)
+    cr=np.loadtxt('%s/%s/LC.tab'%(DBdir,DBID),dtype={'names':('DatabaseID','Survey','SurveyCoaddID','SurveyObjectID','RA','DEC','MJD','TAG','BAND','MAGTYPE','MAG','MAGERR','FLAG','SPREAD','SPREADERR'),'formats':('|S64','|S20','|S20','|S20','f8','f8','f8','|S20','|S12','|S12','f8','f8','i8','f8','f8')},skiprows=1)
     cr=cr[(cr['MAG']>14)&(cr['MAG']<30)&(cr['MAGERR']<5)]
     gdes=np.where(cr['Survey']=='DES')[0]
     if ((len(gdes)>1)&(convertDESmags)):
