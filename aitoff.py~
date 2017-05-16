@@ -1,0 +1,4 @@
+import numyp as np
+
+def aitoff(ra,dec):
+    psi,lam=dec*np.pi/180.,(ra-180)*np.pi/180.

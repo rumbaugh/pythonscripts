@@ -1,148 +1,68 @@
 import numpy as np
-import math as m
-import sys
+execfile('/home/rumbaugh/pythonscripts/calc_SF_Xray.py')
 
-#This script calculates power ratios in Chandra images according
-# to the method of Jeltema et al. (2005). Note that in that method
-#only P_m/P_o are measured so that flux cancels out, and the units
-# of flux/surface brightness don't matter. Thus, all units in here are in
-# units of photon counts per pixel. 
-# These functions require an image to be loaded into Sherpa
-# Remember, mass density is square root of surface brightness
-
-def find_reg_circ(data,cenx,ceny,rad,nonzero=1,pixsize=0.492):
-    #creates an array containing indexes of all pixels in data within a 
-    # circular region of size rad cemtered on cenx,ceny. data must
-    # be 2-dimensional array of Chandra data. pixsize is the dimension of
-    # a pixel in arcseconds. cenRa, cenDec should be in decimal form. rad 
-    #should be in arcseconds. If nonzero = 1, it will only return indices
-    # for pixels with nonzero values
-    prad = rad*1.0/pixsize
-    dshape = np.shape(data)
-    maxx,maxy = np.ceil(cenx+prad)+1,np.ceil(ceny+prad)+1
-    minx,miny = np.floor(cenx-prad),np.floor(ceny-prad)
-    if np.floor(dshape[1]-cenx) <= prad + 1: maxx = dshape[1]
-    if np.floor(dshape[0]-ceny) <= prad + 1: maxy = dshape[0]
-    if cenx <= prad: minx = 0
-    if ceny <= prad: miny = 0
-    tempbox = np.zeros(dshape)
-    tempbox[miny:maxy,minx:maxx] = 1
-    gfrc = np.where(tempbox > 0.5)
-    for igfrc in range(0,len(gfrc[0])):
-        if (nonzero == 1):
-            if ((m.sqrt((cenx-gfrc[1][igfrc])**2+(ceny-gfrc[0][igfrc])**2) <= prad) & (data[gfrc[0][igfrc],gfrc[1][igfrc]] > 0)): tempbox[gfrc[0][igfrc],gfrc[1][igfrc]] = 2
-        else:
-            if ((m.sqrt((cenx-gfrc[1][igfrc])**2+(ceny-gfrc[0][igfrc])**2) <= prad)): tempbox[gfrc[0][igfrc],gfrc[1][igfrc]] = 2
-    return np.where(tempbox > 1.5)
-            
-    
-    
-
-def a_m(data,gdata,order,cenx,ceny,pixsize=0.492):
-    #calculate a_m(R) = integrate{R' <_ R}[Sigma(x')(R')^m cos m phi' d^2 x']
-    if round(order) != order: sys.exit("order = %f; must be whole number"%(order))
-    a_m_sum = 0.0
-    if order > 1.5:
-        for iam in range(0,len(gdata[0])):
-            Rprime = m.sqrt((cenx-gdata[1][iam])**2+(ceny-gdata[0][iam])**2)
-            if Rprime == 0:
-                phiprime = 0.0
-            else:
-                phiprime = m.acos((gdata[1][iam]-cenx)/Rprime)
-                if gdata[0][iam] > ceny: phiprime = 2*m.pi-phiprime
-            a_m_sum += data[gdata[0][iam],gdata[1][iam]]*Rprime**order*m.cos(order*phiprime)
-    elif order > 0.5:
-        for iam in range(0,len(gdata[0])):
-            Rprime = m.sqrt((cenx-gdata[1][iam])**2+(ceny-gdata[0][iam])**2)
-            if Rprime == 0:
-                cosphiprime = 1.0
-            else:
-                cosphiprime = ((gdata[1][iam]-cenx)/Rprime)
-            a_m_sum += data[gdata[0][iam],gdata[1][iam]]*Rprime**order*cosphiprime
-    else: 
-        for iam in range(0,len(gdata[0])): a_m_sum += data[gdata[0][iam],gdata[1][iam]]
-    a_m_sum *= pixsize**(order+2)
-    return a_m_sum
-
-def b_m(data,gdata,order,cenx,ceny,pixsize=0.492):
-    #calculate b_m(R) = integrate{R' <_ R}[Sigma(x')(R')^m sin m phi' d^2 x']
-    if round(order) != order: sys.exit("order = %f; must be whole number"%(order))
-    b_m_sum = 0.0
-    if order > 0.5:
-        for ibm in range(0,len(gdata[0])):
-            Rprime = m.sqrt((cenx-gdata[1][ibm])**2+(ceny-gdata[0][ibm])**2)
-            if Rprime == 0:
-                phiprime = 0.0
-            else:
-                phiprime = m.acos((gdata[1][ibm]-cenx)/Rprime)
-                if gdata[0][ibm] > ceny: phiprime = 2*m.pi-phiprime
-            b_m_sum += data[gdata[0][ibm],gdata[1][ibm]]*Rprime**order*m.sin(order*phiprime)
-    else: 
-        for ibm in range(0,len(gdata[0])): b_m_sum += data[gdata[0][ibm],gdata[1][ibm]]
-    b_m_sum *= pixsize**(order+2)
-    return b_m_sum
-
-def P_0(data,cenx,ceny,rad):
-    #calculates P_0 = (a_0 ln(R))^2; rad in arcseconds, cenx ceny in pix
-    gdata = find_reg_circ(data,cenx,ceny,rad)
-    t_a_0 = a_m(data,gdata,0,cenx,ceny)
-    return (t_a_0*m.log(rad))**2
-
-def P_m(data,order,cenx,ceny,rad,sqrt=0):
-    #calculates P_m = 0.5*m^-2 R^-2m (a_m^2+b_m^2); rad in arcseconds, cenx ceny in pix
-    if sqrt == 1:
-        for isqrt in range(0,len(data)): data[isqrt] = m.sqrt(data[isqrt])
-    if order == 0:
-        return P_0(data,cenx,ceny,rad)
+def a_m(data,m,R,xcen=None,ycen=None):
+    xsize,ysize=np.shape(data)[-2],np.shape(data)[-1]
+    if xcen==None:xcen=0.5*(xsize-1)
+    if ycen==None:ycen=0.5*(ysize-1)
+    xcoord,ycoord=np.arange(xsize)*np.ones(ysize).reshape((ysize,1))-xcen,np.ones(xsize)*np.arange(ysize).reshape((ysize,1))-ycen
+    r=np.sqrt(xcoord**2+ycoord**2)
+    phi=np.arctan(ycoord*1./xcoord)
+    phi[(xcoord==0)&(ycoord>=0)]=np.pi/2
+    phi[(xcoord==0)&(ycoord<0)]=-np.pi/2
+    phi[xcoord<0]+=np.pi
+    g=np.where((np.abs(xcoord)<R)&(np.abs(ycoord)<R))
+    if len(np.shape(data))>2:
+        out=np.zeros(np.shape(data)[0])
+        for i in range(0,len(out)): out[i]=np.sum(data[i][g]*np.cos(m*phi[g])*r[g]**m)#*.492**2
+        return out
     else:
-        gdata = find_reg_circ(data,cenx,ceny,rad)
-        t_a = a_m(data,gdata,order,cenx,ceny)
-        t_b = b_m(data,gdata,order,cenx,ceny)
-        return 0.5*(t_a**2+t_b**2)/(order**2*rad**(2*order))
+        return np.sum(data[g]*np.cos(m*phi[g])*r[g]**m)#*.492**2
 
-def a_m_var(data,gdata,order,cenx,ceny,pixsize=0.492):
-    #calculate var_a_m(R) = sum{R' <_ R}[Sigma(x')^2(R')^2m cos^2 m phi' (del_x')^4]
-    if round(order) != order: sys.exit("order = %f; must be whole number"%(order))
-    a_m_var_sum = 0.0
-    if order > 0.5:
-        for iamv in range(0,len(gdata[0])):
-            Rprime = m.sqrt((cenx-gdata[1][iamv])**2+(ceny-gdata[0][iamv])**2)
-            phiprime = m.acos((gdata[1][iamv]-cenx)/Rprime)
-            a_m_var_sum += (data[gdata[0][iamv],gdata[1][iamv]])*Rprime**(2*order)*(m.cos(order*phiprime))**2
-    else: 
-        for iamv in range(0,len(gdata[0])): a_m_var_sum += (data[gdata[0][iamv],gdata[1][iamv]])
-    a_m_var_sum *= pixsize**(2*order+4)
-    return a_m_var_sum
-
-def b_m_var(data,gdata,order,cenx,ceny,pixsize=0.492):
-    #calculate var_b_m(R) = sum{R' <_ R}[Sigma(x')^2(R')^2m sin^2 m phi' (del_x')^4]
-    if round(order) != order: sys.exit("order = %f; must be whole number"%(order))
-    b_m_var_sum = 0.0
-    if order > 0.5:
-        for ibmv in range(0,len(gdata[0])):
-            Rprime = m.sqrt((cenx-gdata[1][ibmv])**2+(ceny-gdata[0][ibmv])**2)
-            phiprime = m.acos((gdata[1][ibmv]-cenx)/Rprime)
-            b_m_var_sum += (data[gdata[0][ibmv],gdata[1][ibmv]])*Rprime**(2*order)*(m.sin(order*phiprime))**2
-    else: 
-        for ibmv in range(0,len(gdata[0])): b_m_var_sum += (data[gdata[0][ibmv],gdata[1][ibmv]])
-    b_m_var_sum *= pixsize**(2*order+4)
-    return b_m_var_sum
-
-def P_0_var(data,cenx,ceny,rad):
-    #calculates var_P_0 = 4*var_a_0*a_0^2*ln(R)^4; rad in arcseconds, cenx ceny in pix
-    gdata = find_reg_circ(data,cenx,ceny,rad)
-    t_a_0 = a_m(data,gdata,0,cenx,ceny)
-    t_a_0_v = a_m_var(data,gdata,0,cenx,ceny)
-    return 4*t_a_0_v*(t_a_0)**2*(m.log(rad))**4
-
-def P_m_var(data,order,cenx,ceny,rad):
-    #calculates P_m = m^-4 R^-4m (a_m_var*a_m^2+b_m_var*b_m^2); rad in arcseconds, cenx ceny in pix
-    if order == 0:
-        return P_0_var(data,cenx,ceny,rad)
+def b_m(data,m,R,xcen=None,ycen=None):
+    xsize,ysize=np.shape(data)[-2],np.shape(data)[-1]
+    if xcen==None:xcen=0.5*(xsize-1)
+    if ycen==None:ycen=0.5*(ysize-1)
+    xcoord,ycoord=np.arange(xsize)*np.ones(ysize).reshape((ysize,1))-xcen,np.ones(xsize)*np.arange(ysize).reshape((ysize,1))-ycen
+    r=np.sqrt(xcoord**2+ycoord**2)
+    phi=np.arctan(ycoord*1./xcoord)
+    phi[(xcoord==0)&(ycoord>=0)]=np.pi/2
+    phi[(xcoord==0)&(ycoord<0)]=-np.pi/2
+    phi[xcoord<0]+=np.pi
+    g=np.where((np.abs(xcoord)<R)&(np.abs(ycoord)<R))
+    if len(np.shape(data))>2:
+        out=np.zeros(np.shape(data)[0])
+        for i in range(0,len(out)): out[i]=np.sum(data[i][g]*np.sin(m*phi[g])*r[g]**m)#*.492**2
+        return out
     else:
-        gdata = find_reg_circ(data,cenx,ceny,rad)
-        t_a = a_m(data,gdata,order,cenx,ceny)
-        t_b = b_m(data,gdata,order,cenx,ceny)
-        t_a_v = a_m_var(data,gdata,order,cenx,ceny)
-        t_b_v = b_m_var(data,gdata,order,cenx,ceny)
-        return (t_a_v*t_a**2+t_b_v*t_b**2)/(order**4*rad**(4*order))
+        return np.sum(data[g]*np.sin(m*phi[g])*r[g]**m)#*.492**2
+
+def PowerRatio(data,m,R,xcen=None,ycen=None):
+    mask=np.zeros(np.shape(data)[-2:])
+    xsize,ysize=np.shape(data)[-2],np.shape(data)[-1]
+    xcoord,ycoord=np.arange(xsize)*np.ones(ysize).reshape((ysize,1)),np.ones(xsize)*np.arange(ysize).reshape((ysize,1))
+    mask[np.sqrt((xcoord-0.5*(xsize-1))**2+(ycoord-0.5*(ysize-1))**2)<=R]=1
+    data*=mask
+    return (a_m(data,m,R,xcen,ycen)**2+b_m(data,m,R,xcen,ycen)**2)/(2.*m**2*R**(2*m))/(a_m(data,0,R,xcen,ycen)*np.log(R))**2
+
+def PowerRatioError(data,m,R,r_smooth,xcen=None,ycen=None,ntrials=10):
+    randcounts=np.random.poisson(data,((ntrials,)+np.shape(data)))
+    randSF=np.zeros(np.shape(randcounts))
+    for i in range(0,ntrials):
+        randSF[i]=calc_SF_Xray(randcounts[i],'tophat',[r_smooth])
+    randnoise=np.random.poisson(np.ones(np.shape(data))*np.sum(data),((ntrials,)+np.shape(data)))
+    noiseSF=np.zeros(np.shape(randnoise))
+    for i in range(0,ntrials):
+        noiseSF[i]=calc_SF_Xray(randnoise[i],'tophat',[r_smooth])
+    if np.shape(m)==():
+        m=np.array([m])
+    PLBs,PUBs=np.zeros(len(m)),np.zeros(len(m))
+    for mcur,im in zip(m,np.arange(len(m))):
+        Pcur=PowerRatio(randSF,mcur,R)
+        PLBs[im],PUBs[im]=np.sort(Pcur)[int((0.5-0.5*0.682689492)*ntrials)],np.sort(Pcur)[int((0.5+0.5*0.682689492)*ntrials)]
+        Pnoise=PowerRatio(noiseSF,mcur,R)
+        PLBs[im]-=np.sort(Pnoise)[int((0.5-0.5*0.682689492)*ntrials)]
+        PUBs[im]-=np.sort(Pnoise)[int((0.5+0.5*0.682689492)*ntrials)]
+        print np.sort(Pnoise)[int((0.5-0.5*0.682689492)*ntrials)],np.sort(Pnoise)[int((0.5+0.5*0.682689492)*ntrials)]
+    return PLBs,PUBs
+        
