@@ -63,6 +63,6 @@ def PowerRatioError(data,m,R,r_smooth,xcen=None,ycen=None,ntrials=10):
         Pnoise=PowerRatio(noiseSF,mcur,R)
         PLBs[im]-=np.sort(Pnoise)[int((0.5-0.5*0.682689492)*ntrials)]
         PUBs[im]-=np.sort(Pnoise)[int((0.5+0.5*0.682689492)*ntrials)]
-        print np.sort(Pnoise)[int((0.5-0.5*0.682689492)*ntrials)],np.sort(Pnoise)[int((0.5+0.5*0.682689492)*ntrials)]
+        #print np.sort(Pnoise)[int((0.5-0.5*0.682689492)*ntrials)],np.sort(Pnoise)[int((0.5+0.5*0.682689492)*ntrials)]
     return PLBs,PUBs
         
