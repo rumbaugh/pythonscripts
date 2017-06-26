@@ -66,7 +66,7 @@ def qso_engine(time,data,error,ltau=3.,lvar=-1.7,sys_err=0.,return_model=False):
         Full covariance C^(-1) = (L+D)^(-1) = T [T+D^(-1)]^(-1) D^(-1)
         Code takes advantage of the tridiagonality of T and T+D^(-1)."""
 
-
+    print 'Starting qso_engine'
     out_dict={}
     out_dict['chi2_qso/nu']=999; out_dict['chi2_qso/nu_extra']=0.;
     out_dict['signif_qso']=0.; out_dict['signif_not_qso']=0.;  out_dict['signif_vary']=0.
@@ -78,24 +78,27 @@ def qso_engine(time,data,error,ltau=3.,lvar=-1.7,sys_err=0.,return_model=False):
 
     ln = len(data)
     dt = abs(time[1:]-time[:-1])
-
+    print 'Checking time ordering'
     # first make sure all dt>0
     g=where(dt>0.)[0]; lg = len(g)
     # must have at least 2 data points
     if (lg<=0):
         return out_dict
 
+    print 'Initializing model'
     if (return_model):
         model = 1.*data; dmodel = -1.*error
 
     if (lg<ln):
-      dt = dt[g]
-      gg = zeros(lg+1,dtype='int64'); gg[1:] = g+1
-      dat = data[gg]; wt = 1./(sys_err**2+error[gg]**2)
-      ln = lg+1
+        print 'lg<ln'
+        dt = dt[g]
+        gg = zeros(lg+1,dtype='int64'); gg[1:] = g+1
+        dat = data[gg]; wt = 1./(sys_err**2+error[gg]**2)
+        ln = lg+1
     else:
-      dat = 1.*data
-      wt = 1./(sys_err**2+error**2)
+        print 'lg>=ln'
+        dat = 1.*data
+        wt = 1./(sys_err**2+error**2)
 
     out_dict['nu'] = ln-1.
     varx = var(dat)
@@ -188,11 +191,11 @@ def qso_engine(time,data,error,ltau=3.,lvar=-1.7,sys_err=0.,return_model=False):
       dmodel[gg] = 1./sqrt(diagC)
       out_dict['model'] = model
       out_dict['dmodel'] = dmodel
-
+    print 'qso_engine finished'
     return out_dict
 
 
-def qso_fit(time,data,error,filter='r',sys_err=0.0,return_model=False):
+def qso_fit(time,data,error,filter='r',sys_err=0.0,return_model=False,dmean=19.):
     """ Best-fit qso model determined for Sesar Strip82, ugriz-bands (default r).
         See additional notes for underlying code qso_engine.
 
@@ -231,8 +234,8 @@ def qso_fit(time,data,error,filter='r',sys_err=0.0,return_model=False):
 
     par = pars[filter.lower()]
     mag0 = median(data)
-    lvar = par[0]+par[1]*(mag0-19.)
-    ltau = par[2]+par[3]*(mag0-19.)
+    lvar = par[0]+par[1]*(mag0-dmean)
+    ltau = par[2]+par[3]*(mag0-dmean)
 
     time = atleast_1d(time).astype('float64')
     data = atleast_1d(data).astype('float64')
